@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Suite de Pruebas OrangeHRM">
+
+    <test name="Pruebas en Chrome">
+        <parameter name="browser" value="chrome"/>
+        <classes>
+            <class name="page_tests.LoginTest"/>    
+            <class name="page_tests.EmployeeTest"/> 
+            <class name="page_tests.LoginDataDrivenTest"/> 
+        </classes>
+    </test>
+
+</suite>

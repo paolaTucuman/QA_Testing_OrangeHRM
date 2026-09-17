@@ -1,0 +1,16 @@
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Maven y reportes
+target/
+test-output/
+
+# Configuracion local y secretos
+src/test/resources/config.properties
+
+# Evidencias y archivos temporales
+*.log
+*.tmp
+screenshots/

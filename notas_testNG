@@ -1,0 +1,15 @@
+/*
+
+porque TestNG muestra como resultado TESTS: 1 y METHODS:3
+R.- Porque los cuenta...
+
+• 1 Suite (Suite de Pruebas OrangeHRM).
+• 1 Test (Pruebas en Chrome).
+• 3 Métodos (testLoginExitoso, testLoginFallido, testAgregarEmpleado).
+
+/*
+
+
+
+
+
