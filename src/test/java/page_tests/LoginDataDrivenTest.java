@@ -34,7 +34,7 @@ public class LoginDataDrivenTest extends BaseTest {
         String password = datos.get("password");
         String expectedResult = datos.get("expectedResult");
 
-        System.out.println("Probando: " + username + " / " + password + " -> Esperado: " + expectedResult);
+        System.out.println("Probando usuario: " + username + " -> Esperado: " + expectedResult);
 
         String loginUrl = ConfigReader.get("base.url");
         driver.navigate().to(loginUrl);
