@@ -4,6 +4,8 @@ El objetivo es alinear el proyecto con los casos automatizados TC01, TC02, TC06,
 
 ## Fase 1 Seguridad y control de ejecución
 
+Estado: completada y confirmada en el commit `b9a7830`.
+
 - Desactivar la creación automática de incidencias Jira por defecto.
 - Evitar que la regresión incluya pruebas deliberadamente fallidas.
 - Configurar Maven para ejecutar únicamente la suite TestNG declarada.
@@ -12,6 +14,8 @@ El objetivo es alinear el proyecto con los casos automatizados TC01, TC02, TC06,
 - Verificar la estructura de la suite sin abrir el navegador.
 
 ## Fase 2 Base estable de Selenium
+
+Estado: implementada y pendiente de revisión.
 
 - Sustituir la espera implícita por esperas explícitas.
 - Hacer que el inicio de cada prueba falle inmediatamente si Login no carga.

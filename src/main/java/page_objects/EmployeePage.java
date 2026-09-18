@@ -1,13 +1,12 @@
 package page_objects;
 
+import page_base.BasePage;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
-public class EmployeePage {
-
-    private WebDriver driver;
+public class EmployeePage extends BasePage {
 
     @FindBy(xpath = "//span[text()='PIM']")
     private WebElement pimMenu;
@@ -31,39 +30,30 @@ public class EmployeePage {
     private WebElement personalDetailsTitle;
 
     public EmployeePage(WebDriver driver) {
-        this.driver = driver;
+        super(driver);
         PageFactory.initElements(driver, this);
     }
 
     public void goToPIM() {
-        pimMenu.click();
+        waitUntilClickable(pimMenu).click();
     }
 
     public void clickAddEmployee() {
-        addEmployeeButton.click();
+        waitUntilClickable(addEmployeeButton).click();
     }
 
     public void fillEmployeeForm(String firstName, String middleName, String lastName) {
-        firstNameInput.clear();
-        firstNameInput.sendKeys(firstName);
-
-        middleNameInput.clear();
-        middleNameInput.sendKeys(middleName);
-
-        lastNameInput.clear();
-        lastNameInput.sendKeys(lastName);
+        clearAndType(firstNameInput, firstName);
+        clearAndType(middleNameInput, middleName);
+        clearAndType(lastNameInput, lastName);
     }
 
     public void saveEmployee() {
-        saveButton.click();
+        waitUntilClickable(saveButton).click();
     }
 
     public boolean isPersonalDetailsDisplayed() {
-        try {
-            return personalDetailsTitle.isDisplayed();
-        } catch (Exception e) {
-            return false;
-        }
+        return isDisplayed(personalDetailsTitle);
     }
 
     public void addEmployee(String firstName, String middleName, String lastName) {
