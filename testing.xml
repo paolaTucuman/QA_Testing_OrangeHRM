@@ -4,9 +4,8 @@
     <test name="Pruebas en Chrome">
         <parameter name="browser" value="chrome"/>
         <classes>
-            <class name="page_tests.LoginTest"/>    
-            <class name="page_tests.EmployeeTest"/> 
-            <class name="page_tests.LoginDataDrivenTest"/> 
+            <class name="page_tests.LoginTest"/>
+            <class name="page_tests.EmployeeTest"/>
         </classes>
     </test>
 

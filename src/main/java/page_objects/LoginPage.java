@@ -20,9 +20,6 @@ public class LoginPage extends BasePage {
     @FindBy(xpath = "//p[contains(@class, 'oxd-alert-content-text')]")
     private WebElement errorMessage;
 
-    @FindBy(xpath = "//h6[text()='Dashboard']")
-    private WebElement dashboardTitle;
-
     public LoginPage(WebDriver driver) {
         super(driver);
         PageFactory.initElements(driver, this);
@@ -44,8 +41,12 @@ public class LoginPage extends BasePage {
         return waitUntilVisible(errorMessage).getText();
     }
 
-    public boolean isDashboardDisplayed() {
-        return isDisplayed(dashboardTitle);
+    public boolean isLoginFormDisplayed() {
+        return isDisplayed(usernameInput) && isDisplayed(passwordInput) && isDisplayed(loginButton);
+    }
+
+    public boolean isLoginFormHidden() {
+        return isInvisible(usernameInput);
     }
 
     public void login(String username, String password) {

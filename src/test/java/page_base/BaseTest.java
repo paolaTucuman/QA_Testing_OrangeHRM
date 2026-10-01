@@ -72,6 +72,10 @@ public class BaseTest {
         }
     }
 
+    protected String getCurrentBrowser() {
+        return currentBrowser;
+    }
+
     @AfterMethod(alwaysRun = true)
     public void tearDown(ITestResult result) {
         try {

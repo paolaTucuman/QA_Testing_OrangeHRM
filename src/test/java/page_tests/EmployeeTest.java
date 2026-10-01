@@ -1,6 +1,7 @@
 package page_tests;
 
 import page_base.BaseTest;
+import page_objects.DashboardPage;
 import page_objects.EmployeePage;
 import page_objects.LoginPage;
 import page_utils.ConfigReader;
@@ -16,7 +17,8 @@ public class EmployeeTest extends BaseTest {
                 ConfigReader.get("admin.username"),
                 ConfigReader.get("admin.password")
         );
-        Assert.assertTrue(loginPage.isDashboardDisplayed(), "Login fallo");
+        DashboardPage dashboardPage = new DashboardPage(driver);
+        Assert.assertTrue(dashboardPage.isDashboardDisplayed(), "Login fallo");
 
         EmployeePage employeePage = new EmployeePage(driver);
         employeePage.addEmployee("Paola", "Maria", "Test");

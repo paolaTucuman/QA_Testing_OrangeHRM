@@ -43,4 +43,20 @@ public abstract class BasePage {
             return false;
         }
     }
+
+    protected boolean isDisplayedNow(WebElement element) {
+        try {
+            return element.isDisplayed();
+        } catch (NoSuchElementException | StaleElementReferenceException e) {
+            return false;
+        }
+    }
+
+    protected boolean isInvisible(WebElement element) {
+        try {
+            return wait.until(ExpectedConditions.invisibilityOf(element));
+        } catch (TimeoutException | NoSuchElementException | StaleElementReferenceException e) {
+            return false;
+        }
+    }
 }
