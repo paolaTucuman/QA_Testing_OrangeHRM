@@ -28,6 +28,10 @@ public abstract class BasePage {
         return wait.until(ExpectedConditions.visibilityOf(element));
     }
 
+    protected WebElement waitUntilVisible(By locator) {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+    }
+
     protected WebElement waitUntilClickable(WebElement element) {
         return wait.until(ExpectedConditions.elementToBeClickable(element));
     }

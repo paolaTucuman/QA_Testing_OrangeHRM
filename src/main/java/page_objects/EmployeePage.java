@@ -17,6 +17,9 @@ public class EmployeePage extends BasePage {
     @FindBy(xpath = "//button[normalize-space()='Add']")
     private WebElement addEmployeeButton;
 
+    @FindBy(xpath = "//a[normalize-space()='Employee List']")
+    private WebElement employeeListTab;
+
     @FindBy(name = "firstName")
     private WebElement firstNameInput;
 
@@ -32,6 +35,9 @@ public class EmployeePage extends BasePage {
     @FindBy(xpath = "//button[@type='submit']")
     private WebElement saveButton;
 
+    @FindBy(xpath = "//button[@type='submit' and normalize-space()='Search']")
+    private WebElement searchButton;
+
     @FindBy(xpath = "//h6[normalize-space()='Personal Details']")
     private WebElement personalDetailsTitle;
 
@@ -46,6 +52,12 @@ public class EmployeePage extends BasePage {
 
     public void clickAddEmployee() {
         waitUntilClickable(addEmployeeButton).click();
+    }
+
+    public void goToEmployeeList() {
+        waitUntilClickable(employeeListTab).click();
+        waitUntilClickable(searchButton);
+        waitUntilInvisible(LOADING_SPINNER);
     }
 
     public void fillEmployeeForm(String firstName, String middleName, String lastName) {
@@ -85,6 +97,24 @@ public class EmployeePage extends BasePage {
         waitUntilHasValue(employeeIdInput);
         waitUntilInvisible(LOADING_SPINNER);
         scrollIntoView(firstNameInput);
+    }
+
+    public String searchEmployeeById(String employeeId) {
+        goToEmployeeList();
+        clearAndType(employeeIdInput, employeeId);
+        waitUntilClickable(searchButton).click();
+        waitUntilInvisible(LOADING_SPINNER);
+
+        WebElement resultRow = waitUntilVisible(employeeResultRow(employeeId));
+        scrollIntoView(resultRow);
+        return resultRow.getText();
+    }
+
+    private By employeeResultRow(String employeeId) {
+        return By.xpath(
+                "//div[contains(@class,'oxd-table-card')]" +
+                "[.//div[normalize-space()='" + employeeId + "']]"
+        );
     }
 
     public String addEmployee(String firstName, String middleName, String lastName) {

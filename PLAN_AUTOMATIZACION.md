@@ -55,7 +55,9 @@ el Employee ID sin indicador de carga.
 
 ## Fase 5 Búsqueda de empleado TC07
 
-Estado: pendiente.
+Estado: validada funcional y visualmente en Chrome el 2026-10-01: 1 prueba
+aprobada, 0 fallidas y 0 omitidas. La evidencia muestra una unica fila con el
+Employee ID, nombre y apellido creados.
 
 - Añadir acciones de Employee List y Search al Page Object.
 - Preparar datos independientes dentro de la prueba.

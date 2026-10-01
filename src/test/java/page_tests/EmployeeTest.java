@@ -20,15 +20,7 @@ public class EmployeeTest extends BaseTest {
 
     @Test(groups = {"automated", "positive"})
     public void tc06RegistrarEmpleadoConDatosValidos() {
-        LoginPage loginPage = new LoginPage(driver);
-        loginPage.login(
-                ConfigReader.get("admin.username"),
-                ConfigReader.get("admin.password")
-        );
-
-        DashboardPage dashboardPage = new DashboardPage(driver);
-        Assert.assertTrue(dashboardPage.isDashboardDisplayed(),
-                "TC06: no fue posible iniciar sesion");
+        loginAsAdmin("TC06");
 
         String suffix = LocalDateTime.now().format(UNIQUE_SUFFIX);
         String firstName = "Auto" + suffix;
@@ -54,5 +46,51 @@ public class EmployeeTest extends BaseTest {
         employeePage.preparePersonalDetailsEvidence();
         ScreenshotHelper.takeScreenshot(driver,
                 "TC06_Registro_Empleado_Exitoso_" + getCurrentBrowser());
+    }
+
+    @Test(groups = {"automated", "positive"})
+    public void tc07BuscarEmpleadoCreadoPorId() {
+        loginAsAdmin("TC07");
+
+        String suffix = LocalDateTime.now().format(UNIQUE_SUFFIX);
+        String firstName = "Auto" + suffix;
+        String middleName = "QA";
+        String lastName = "TC07" + suffix;
+
+        EmployeePage employeePage = new EmployeePage(driver);
+        String employeeId = employeePage.addEmployee(firstName, middleName, lastName);
+
+        Assert.assertFalse(employeeId.isBlank(),
+                "TC07: OrangeHRM no genero un Employee ID para la busqueda");
+
+        String resultText = employeePage.searchEmployeeById(employeeId);
+
+        Assert.assertTrue(containsExactLine(resultText, employeeId),
+                "TC07: la fila encontrada no contiene el Employee ID exacto");
+        Assert.assertTrue(resultText.contains(firstName),
+                "TC07: la fila encontrada no contiene el First Name creado");
+        Assert.assertTrue(resultText.contains(lastName),
+                "TC07: la fila encontrada no contiene el Last Name creado");
+
+        ScreenshotHelper.takeScreenshot(driver,
+                "TC07_Busqueda_Empleado_Exitoso_" + getCurrentBrowser());
+    }
+
+    private void loginAsAdmin(String caseId) {
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.login(
+                ConfigReader.get("admin.username"),
+                ConfigReader.get("admin.password")
+        );
+
+        DashboardPage dashboardPage = new DashboardPage(driver);
+        Assert.assertTrue(dashboardPage.isDashboardDisplayed(),
+                caseId + ": no fue posible iniciar sesion");
+    }
+
+    private boolean containsExactLine(String text, String expectedLine) {
+        return text.lines()
+                .map(String::trim)
+                .anyMatch(expectedLine::equals);
     }
 }
