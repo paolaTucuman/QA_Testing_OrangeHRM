@@ -1,5 +1,7 @@
 package page_base;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
@@ -34,6 +36,30 @@ public abstract class BasePage {
         WebElement visibleElement = waitUntilVisible(element);
         visibleElement.clear();
         visibleElement.sendKeys(value == null ? "" : value);
+    }
+
+    protected String waitUntilHasValue(WebElement element) {
+        return wait.until(driver -> {
+            String value = element.getAttribute("value");
+            return value == null || value.isBlank() ? null : value.trim();
+        });
+    }
+
+    protected String getInputValue(WebElement element) {
+        String value = waitUntilVisible(element).getAttribute("value");
+        return value == null ? "" : value.trim();
+    }
+
+    protected void waitUntilInvisible(By locator) {
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(locator));
+    }
+
+    protected void scrollIntoView(WebElement element) {
+        WebElement visibleElement = waitUntilVisible(element);
+        ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});",
+                visibleElement
+        );
     }
 
     protected boolean isDisplayed(WebElement element) {

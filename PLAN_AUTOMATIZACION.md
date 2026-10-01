@@ -43,7 +43,9 @@ Estado: implementada y validada en Chrome el 2026-10-01: 2 pruebas aprobadas,
 
 ## Fase 4 Registro de empleado TC06
 
-Estado: pendiente.
+Estado: validada funcional y visualmente en Chrome el 2026-10-01: 1 prueba
+aprobada, 0 fallidas y 0 omitidas. La evidencia muestra los datos guardados y
+el Employee ID sin indicador de carga.
 
 - Generar datos ficticios únicos para evitar duplicados.
 - Capturar el Employee ID y los datos realmente guardados.
