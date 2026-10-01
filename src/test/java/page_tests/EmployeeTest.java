@@ -76,6 +76,28 @@ public class EmployeeTest extends BaseTest {
                 "TC07_Busqueda_Empleado_Exitoso_" + getCurrentBrowser());
     }
 
+    @Test(groups = {"automated", "negative"})
+    public void tc08ValidarFirstNameObligatorio() {
+        loginAsAdmin("TC08");
+
+        String suffix = LocalDateTime.now().format(UNIQUE_SUFFIX);
+        String lastName = "TC08" + suffix;
+
+        EmployeePage employeePage = new EmployeePage(driver);
+        employeePage.attemptAddEmployeeWithoutFirstName(lastName);
+
+        Assert.assertEquals(employeePage.getFirstNameRequiredMessage(), "Required",
+                "TC08: no se mostro Required para First Name");
+        Assert.assertTrue(employeePage.isOnAddEmployeePage(),
+                "TC08: el formulario Add Employee no permanecio visible");
+        Assert.assertFalse(employeePage.isPersonalDetailsDisplayedNow(),
+                "TC08: no se debe crear un empleado sin First Name");
+
+        employeePage.prepareFirstNameValidationEvidence();
+        ScreenshotHelper.takeScreenshot(driver,
+                "TC08_FirstName_Requerido_" + getCurrentBrowser());
+    }
+
     private void loginAsAdmin(String caseId) {
         LoginPage loginPage = new LoginPage(driver);
         loginPage.login(

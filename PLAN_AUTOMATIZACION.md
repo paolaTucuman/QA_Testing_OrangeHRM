@@ -67,7 +67,9 @@ Employee ID, nombre y apellido creados.
 
 ## Fase 6 Validación de First Name TC08
 
-Estado: pendiente.
+Estado: validada funcional y visualmente en Chrome el 2026-10-01: 1 prueba
+aprobada, 0 fallidas y 0 omitidas. La evidencia muestra First Name vacio, el
+mensaje Required y la permanencia en Add Employee.
 
 - Añadir el localizador del mensaje Required asociado a First Name.
 - Intentar guardar con First Name vacío y Last Name válido.

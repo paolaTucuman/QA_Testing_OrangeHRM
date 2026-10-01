@@ -41,6 +41,12 @@ public class EmployeePage extends BasePage {
     @FindBy(xpath = "//h6[normalize-space()='Personal Details']")
     private WebElement personalDetailsTitle;
 
+    @FindBy(xpath = "//h6[normalize-space()='Add Employee']")
+    private WebElement addEmployeeTitle;
+
+    @FindBy(xpath = "//input[@name='firstName']/ancestor::div[contains(@class,'oxd-input-group')][1]//span[normalize-space()='Required']")
+    private WebElement firstNameRequiredMessage;
+
     public EmployeePage(WebDriver driver) {
         super(driver);
         PageFactory.initElements(driver, this);
@@ -52,6 +58,8 @@ public class EmployeePage extends BasePage {
 
     public void clickAddEmployee() {
         waitUntilClickable(addEmployeeButton).click();
+        waitUntilVisible(addEmployeeTitle);
+        waitUntilInvisible(LOADING_SPINNER);
     }
 
     public void goToEmployeeList() {
@@ -108,6 +116,34 @@ public class EmployeePage extends BasePage {
         WebElement resultRow = waitUntilVisible(employeeResultRow(employeeId));
         scrollIntoView(resultRow);
         return resultRow.getText();
+    }
+
+    public void attemptAddEmployeeWithoutFirstName(String lastName) {
+        goToPIM();
+        clickAddEmployee();
+        clearAndType(firstNameInput, "");
+        clearAndType(middleNameInput, "");
+        clearAndType(lastNameInput, lastName);
+        waitUntilClickable(saveButton).click();
+        waitUntilVisible(firstNameRequiredMessage);
+    }
+
+    public String getFirstNameRequiredMessage() {
+        return waitUntilVisible(firstNameRequiredMessage).getText().trim();
+    }
+
+    public boolean isOnAddEmployeePage() {
+        return isDisplayed(addEmployeeTitle)
+                && driver.getCurrentUrl().contains("/pim/addEmployee");
+    }
+
+    public boolean isPersonalDetailsDisplayedNow() {
+        return isDisplayedNow(personalDetailsTitle);
+    }
+
+    public void prepareFirstNameValidationEvidence() {
+        waitUntilVisible(firstNameRequiredMessage);
+        scrollIntoView(firstNameInput);
     }
 
     private By employeeResultRow(String employeeId) {
