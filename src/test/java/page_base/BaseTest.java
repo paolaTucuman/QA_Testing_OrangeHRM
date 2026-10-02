@@ -1,6 +1,5 @@
 package page_base;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -59,13 +58,10 @@ public class BaseTest {
     private WebDriver createDriver(String browser) {
         switch (browser) {
             case "chrome":
-                WebDriverManager.chromedriver().setup();
                 return new ChromeDriver();
             case "firefox":
-                WebDriverManager.firefoxdriver().setup();
                 return new FirefoxDriver();
             case "edge":
-                WebDriverManager.edgedriver().setup();
                 return new EdgeDriver();
             default:
                 throw new IllegalArgumentException("Navegador no soportado: " + browser);
@@ -84,7 +80,10 @@ public class BaseTest {
                 System.out.println("Prueba fallida: " + result.getName());
                 System.out.println("Razon: " + failureReason);
 
-                String screenshotPath = ScreenshotHelper.takeScreenshot(driver, result.getName());
+                String screenshotPath = ScreenshotHelper.takeScreenshot(
+                        driver,
+                        result.getName() + "_" + currentBrowser
+                );
 
                 try {
                     String titulo = "[AUTO] Bug en: " + result.getName();
@@ -110,6 +109,7 @@ public class BaseTest {
                 System.out.println("Prueba exitosa: " + result.getName());
             } else if (result.getStatus() == ITestResult.SKIP) {
                 System.out.println("Prueba saltada: " + result.getName());
+                System.out.println("Razon: " + getFailureReason(result));
             }
         } finally {
             closeDriver();

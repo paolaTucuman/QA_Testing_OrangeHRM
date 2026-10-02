@@ -2,14 +2,22 @@
 
 Proyecto de QA para automatizar casos funcionales sobre la instancia publica de demostracion de OrangeHRM. Utiliza Java, Selenium WebDriver, TestNG, Maven y el patron Page Object Model.
 
+Los ejecutables de ChromeDriver, GeckoDriver y EdgeDriver se resuelven mediante
+Selenium Manager, incluido oficialmente en Selenium. No se requiere instalar ni
+configurar los drivers manualmente.
+
 ## Estado actual
 
 Actualmente el proyecto incluye:
 
-- Login exitoso y login con credenciales invalidas.
-- Login dirigido por datos desde `TestData.xlsx`.
-- Registro basico de empleados.
-- Capturas automaticas ante fallos.
+- TC01: login con credenciales validas.
+- TC02: login con password invalida.
+- TC06: registro de un empleado con datos validos.
+- TC07: busqueda por ID de un empleado creado por la propia prueba.
+- TC08: validacion de First Name obligatorio.
+- Datos de Login dirigidos desde `TestData.xlsx`.
+- Evidencias de exito y capturas automaticas ante fallos.
+- Regresion secuencial en Chrome, Firefox y Edge.
 - Integracion opcional con Jira, desactivada por defecto.
 
 El avance y las siguientes fases se encuentran en `PLAN_AUTOMATIZACION.md`.
@@ -18,7 +26,7 @@ El avance y las siguientes fases se encuentran en `PLAN_AUTOMATIZACION.md`.
 
 - Java 25.
 - Maven 3.9 o posterior.
-- Google Chrome.
+- Google Chrome, Mozilla Firefox y Microsoft Edge.
 - Acceso a Internet para descargar dependencias y utilizar OrangeHRM Demo.
 
 ## Configuracion local
@@ -45,6 +53,30 @@ mvn clean test
 ```
 
 Maven ejecuta la suite definida en `testing.xml`. Los reportes, capturas y archivos generados se guardan en directorios ignorados por Git, como `target/` y `test-output/`.
+
+La suite ejecuta los cinco casos del grupo `automated` en Chrome, Firefox y Edge,
+en ese orden y sin paralelismo. El resultado esperado es de 15 ejecuciones:
+5 casos x 3 navegadores.
+
+Desde Eclipse tambien se puede ejecutar haciendo clic derecho en `testing.xml` y
+seleccionando `Run As > TestNG Suite`. Para validar la regresion completa no se
+debe ejecutar una clase individual.
+
+Durante la ejecucion no se debe interactuar con las ventanas de los navegadores.
+Las capturas identifican el caso y el navegador para conservar la trazabilidad de
+la evidencia. El resumen final se consulta en la consola y en el reporte TestNG.
+
+Antes de cada captura de exito, los Page Objects esperan que el documento, las
+fuentes, los indicadores de carga y los ciclos de renderizado esten listos. Las
+imagenes se conservan sin modificaciones. El reporte TestNG registra por cada
+validacion el caso, navegador, valor esperado, valor actual y resultado, sin
+incluir passwords.
+
+`EvidenceReporter` no decide si una prueba aprueba o falla: esa responsabilidad
+permanece en las aserciones TestNG. El componente agrega trazabilidad a la consola
+y al Reporter Output. Si vence solamente la preparacion visual, la prueba conserva
+su resultado funcional y la captura queda identificada como `INCOMPLETA`; cuando
+la interfaz queda estable se registra como `LISTA`.
 
 ## Datos de prueba
 

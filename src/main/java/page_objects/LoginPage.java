@@ -49,6 +49,17 @@ public class LoginPage extends BasePage {
         return isInvisible(usernameInput);
     }
 
+    public boolean prepareInvalidLoginEvidence() {
+        wait.until(currentDriver -> {
+            String message = waitUntilVisible(errorMessage).getText();
+            return message == null || message.isBlank() ? null : message.trim();
+        });
+        waitUntilVisible(usernameInput);
+        waitUntilVisible(passwordInput);
+        waitUntilVisible(loginButton);
+        return waitUntilVisualStateIsReady();
+    }
+
     public void login(String username, String password) {
         enterUsername(username);
         enterPassword(password);

@@ -30,4 +30,10 @@ public class DashboardPage extends BasePage {
     public boolean isDashboardDisplayedNow() {
         return isDisplayedNow(dashboardTitle);
     }
+
+    public boolean prepareDashboardEvidence() {
+        waitUntilVisible(dashboardTitle);
+        waitUntilVisible(pimMenu);
+        return waitUntilVisualStateIsReady();
+    }
 }

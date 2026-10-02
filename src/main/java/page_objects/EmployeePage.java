@@ -101,10 +101,11 @@ public class EmployeePage extends BasePage {
         return getInputValue(lastNameInput);
     }
 
-    public void preparePersonalDetailsEvidence() {
+    public boolean preparePersonalDetailsEvidence() {
         waitUntilHasValue(employeeIdInput);
         waitUntilInvisible(LOADING_SPINNER);
         scrollIntoView(firstNameInput);
+        return waitUntilVisualStateIsReady();
     }
 
     public String searchEmployeeById(String employeeId) {
@@ -141,9 +142,16 @@ public class EmployeePage extends BasePage {
         return isDisplayedNow(personalDetailsTitle);
     }
 
-    public void prepareFirstNameValidationEvidence() {
+    public boolean prepareSearchEvidence(String employeeId) {
+        WebElement resultRow = waitUntilVisible(employeeResultRow(employeeId));
+        scrollIntoView(resultRow);
+        return waitUntilVisualStateIsReady();
+    }
+
+    public boolean prepareFirstNameValidationEvidence() {
         waitUntilVisible(firstNameRequiredMessage);
         scrollIntoView(firstNameInput);
+        return waitUntilVisualStateIsReady();
     }
 
     private By employeeResultRow(String employeeId) {

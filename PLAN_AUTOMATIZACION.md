@@ -78,7 +78,9 @@ mensaje Required y la permanencia en Add Employee.
 
 ## Fase 7 Evidencias y regresión completa
 
-Estado: pendiente.
+Estado: completada y validada en Chrome, Firefox y Edge el 2026-10-02:
+15 pruebas aprobadas, 0 fallidas y 0 omitidas. Se revisaron las 15 capturas con
+estado visual `LISTA` y el registro Esperado/Actual de cada validacion.
 
 - Unificar nombres de capturas usando el ID de caso.
 - Mantener capturas de éxito solicitadas y capturas automáticas de fallos.
@@ -89,6 +91,19 @@ Estado: pendiente.
   diagnostico y evitar interferencias entre drivers.
 - Confirmar que Jira permanece desactivado durante la validación.
 - Revisar el reporte TestNG final.
+
+Decision de implementacion: se reutilizan las mismas cinco pruebas y se configura
+la matriz de navegadores en `testing.xml`. La ejecucion es secuencial y filtra el
+grupo `automated`, de modo que las pruebas auxiliares no formen parte de la
+regresion oficial. Las capturas de fallos incluyen tambien el navegador. Tras la
+primera ejecucion cross-browser se sustituyo WebDriverManager por Selenium Manager
+y se actualizo Selenium para corregir la incompatibilidad con los navegadores
+instalados. Las pruebas omitidas muestran ahora su causa en la consola. Las
+capturas esperan la desaparicion de loaders, la carga de fuentes y ciclos de
+renderizado. El reporte TestNG conserva cada comparacion Esperado/Actual y la ruta
+de su captura sin registrar passwords. Un timeout exclusivo de preparacion visual
+no modifica el resultado funcional: clasifica la captura como `INCOMPLETA` para
+su revision, mientras una captura estable queda como `LISTA`.
 
 ## Regla de revisión
 
