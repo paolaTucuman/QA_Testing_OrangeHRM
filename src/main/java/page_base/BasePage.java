@@ -10,16 +10,13 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import page_locators.CommonLocators;
 
 import java.time.Duration;
 
 public abstract class BasePage {
 
     private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(15);
-    private static final By LOADING_INDICATORS = By.cssSelector(
-            ".oxd-loading-spinner, .oxd-form-loader"
-    );
-
     protected final WebDriver driver;
     protected final WebDriverWait wait;
 
@@ -28,33 +25,30 @@ public abstract class BasePage {
         this.wait = new WebDriverWait(driver, DEFAULT_TIMEOUT);
     }
 
-    protected WebElement waitUntilVisible(WebElement element) {
-        return wait.until(ExpectedConditions.visibilityOf(element));
-    }
-
     protected WebElement waitUntilVisible(By locator) {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
 
-    protected WebElement waitUntilClickable(WebElement element) {
-        return wait.until(ExpectedConditions.elementToBeClickable(element));
+    protected WebElement waitUntilClickable(By locator) {
+        return wait.until(ExpectedConditions.elementToBeClickable(locator));
     }
 
-    protected void clearAndType(WebElement element, String value) {
-        WebElement visibleElement = waitUntilVisible(element);
+    protected void clearAndType(By locator, String value) {
+        WebElement visibleElement = waitUntilVisible(locator);
         visibleElement.clear();
         visibleElement.sendKeys(value == null ? "" : value);
     }
 
-    protected String waitUntilHasValue(WebElement element) {
+    protected String waitUntilHasValue(By locator) {
         return wait.until(driver -> {
+            WebElement element = driver.findElement(locator);
             String value = element.getAttribute("value");
             return value == null || value.isBlank() ? null : value.trim();
         });
     }
 
-    protected String getInputValue(WebElement element) {
-        String value = waitUntilVisible(element).getAttribute("value");
+    protected String getInputValue(By locator) {
+        String value = waitUntilVisible(locator).getAttribute("value");
         return value == null ? "" : value.trim();
     }
 
@@ -62,8 +56,8 @@ public abstract class BasePage {
         wait.until(ExpectedConditions.invisibilityOfElementLocated(locator));
     }
 
-    protected void scrollIntoView(WebElement element) {
-        WebElement visibleElement = waitUntilVisible(element);
+    protected void scrollIntoView(By locator) {
+        WebElement visibleElement = waitUntilVisible(locator);
         ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});",
                 visibleElement
@@ -78,7 +72,7 @@ public abstract class BasePage {
                     )
             ));
 
-            wait.until(currentDriver -> currentDriver.findElements(LOADING_INDICATORS)
+            wait.until(currentDriver -> currentDriver.findElements(CommonLocators.LOADING_INDICATORS)
                     .stream()
                     .noneMatch(this::isDisplayedSafely));
 
@@ -101,25 +95,25 @@ public abstract class BasePage {
         }
     }
 
-    protected boolean isDisplayed(WebElement element) {
+    protected boolean isDisplayed(By locator) {
         try {
-            return waitUntilVisible(element).isDisplayed();
+            return waitUntilVisible(locator).isDisplayed();
         } catch (TimeoutException | NoSuchElementException | StaleElementReferenceException e) {
             return false;
         }
     }
 
-    protected boolean isDisplayedNow(WebElement element) {
+    protected boolean isDisplayedNow(By locator) {
         try {
-            return element.isDisplayed();
+            return driver.findElement(locator).isDisplayed();
         } catch (NoSuchElementException | StaleElementReferenceException e) {
             return false;
         }
     }
 
-    protected boolean isInvisible(WebElement element) {
+    protected boolean isInvisible(By locator) {
         try {
-            return wait.until(ExpectedConditions.invisibilityOf(element));
+            return wait.until(ExpectedConditions.invisibilityOfElementLocated(locator));
         } catch (TimeoutException | NoSuchElementException | StaleElementReferenceException e) {
             return false;
         }

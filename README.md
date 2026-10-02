@@ -93,6 +93,7 @@ la interfaz queda estable se registra como `LISTA`.
 
 ```text
 src/main/java/page_base/       Base reutilizable para Page Objects
+src/main/java/page_locators/   Localizadores organizados por pagina
 src/main/java/page_objects/    Page Objects de Login y empleados
 src/test/java/page_base/       Preparacion y cierre del navegador
 src/test/java/page_tests/      Casos automatizados
@@ -100,3 +101,7 @@ src/test/java/page_utils/      Configuracion, Excel, Jira y capturas
 src/test/resources/            Datos y configuracion local
 testing.xml                    Suite de regresion TestNG
 ```
+
+Los localizadores se almacenan como constantes `By` en `page_locators`. Los Page
+Objects consumen esos selectores y conservan las acciones y validaciones; los
+tests no acceden directamente a los localizadores.

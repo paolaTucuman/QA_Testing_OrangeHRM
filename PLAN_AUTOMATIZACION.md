@@ -105,6 +105,37 @@ de su captura sin registrar passwords. Un timeout exclusivo de preparacion visua
 no modifica el resultado funcional: clasifica la captura como `INCOMPLETA` para
 su revision, mientras una captura estable queda como `LISTA`.
 
+## Fase 8 Centralizacion de localizadores
+
+Estado: completada y validada el 2026-10-02 mediante la regresion de 15 pruebas
+en Chrome, Firefox y Edge.
+
+- Crear un paquete unico `page_locators` organizado por pagina.
+- Guardar selectores como constantes `By`, no como `WebElement` globales.
+- Separar localizadores, acciones de Page Objects y escenarios de prueba.
+- Centralizar elementos compartidos y selectores dinamicos.
+- Confirmar que no queden `@FindBy` o selectores directos fuera del paquete.
+- Ejecutar la regresion completa sin modificar datos ni comportamiento.
+
+## Fase 9 Control de ejecucion y datos desde Excel
+
+Estado: pendiente de iniciar despues de validar la fase 8.
+
+- Agregar las hojas `execution` y `employee` a `TestData.xlsx`.
+- Mantener `login` para los datos de TC01 y TC02.
+- Controlar por caso si se ejecuta en Chrome, Firefox y Edge.
+- Mover los inputs no sensibles de TC06, TC07 y TC08 al Excel.
+- Validar columnas, casos desconocidos y configuraciones incompletas.
+
+## Fase 10 Configuracion local y Jira
+
+Estado: pendiente.
+
+- Organizar URL, credenciales OrangeHRM y Jira en `config.properties`.
+- Mantener secretos fuera del Excel y del repositorio.
+- Actualizar `config.example.properties` con placeholders seguros.
+- Documentar que variables de entorno o GitHub Secrets seran la opcion para CI.
+
 ## Regla de revisión
 
 Al terminar cada fase se presentarán los archivos modificados, la verificación realizada y cualquier decisión pendiente. La fase siguiente no comenzará hasta recibir aprobación.

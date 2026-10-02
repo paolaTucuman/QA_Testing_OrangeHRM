@@ -1,171 +1,124 @@
 package page_objects;
 
 import page_base.BasePage;
-import org.openqa.selenium.By;
+import page_locators.CommonLocators;
+import page_locators.EmployeeLocators;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
 
 public class EmployeePage extends BasePage {
 
-    private static final By LOADING_SPINNER = By.cssSelector(".oxd-loading-spinner");
-
-    @FindBy(xpath = "//span[normalize-space()='PIM']")
-    private WebElement pimMenu;
-
-    @FindBy(xpath = "//button[normalize-space()='Add']")
-    private WebElement addEmployeeButton;
-
-    @FindBy(xpath = "//a[normalize-space()='Employee List']")
-    private WebElement employeeListTab;
-
-    @FindBy(name = "firstName")
-    private WebElement firstNameInput;
-
-    @FindBy(name = "middleName")
-    private WebElement middleNameInput;
-
-    @FindBy(name = "lastName")
-    private WebElement lastNameInput;
-
-    @FindBy(xpath = "//label[normalize-space()='Employee Id']/ancestor::div[contains(@class,'oxd-input-group')]//input")
-    private WebElement employeeIdInput;
-
-    @FindBy(xpath = "//button[@type='submit']")
-    private WebElement saveButton;
-
-    @FindBy(xpath = "//button[@type='submit' and normalize-space()='Search']")
-    private WebElement searchButton;
-
-    @FindBy(xpath = "//h6[normalize-space()='Personal Details']")
-    private WebElement personalDetailsTitle;
-
-    @FindBy(xpath = "//h6[normalize-space()='Add Employee']")
-    private WebElement addEmployeeTitle;
-
-    @FindBy(xpath = "//input[@name='firstName']/ancestor::div[contains(@class,'oxd-input-group')][1]//span[normalize-space()='Required']")
-    private WebElement firstNameRequiredMessage;
-
     public EmployeePage(WebDriver driver) {
         super(driver);
-        PageFactory.initElements(driver, this);
     }
 
     public void goToPIM() {
-        waitUntilClickable(pimMenu).click();
+        waitUntilClickable(CommonLocators.PIM_MENU).click();
     }
 
     public void clickAddEmployee() {
-        waitUntilClickable(addEmployeeButton).click();
-        waitUntilVisible(addEmployeeTitle);
-        waitUntilInvisible(LOADING_SPINNER);
+        waitUntilClickable(EmployeeLocators.ADD_EMPLOYEE_BUTTON).click();
+        waitUntilVisible(EmployeeLocators.ADD_EMPLOYEE_TITLE);
+        waitUntilInvisible(CommonLocators.LOADING_SPINNER);
     }
 
     public void goToEmployeeList() {
-        waitUntilClickable(employeeListTab).click();
-        waitUntilClickable(searchButton);
-        waitUntilInvisible(LOADING_SPINNER);
+        waitUntilClickable(EmployeeLocators.EMPLOYEE_LIST_TAB).click();
+        waitUntilClickable(EmployeeLocators.SEARCH_BUTTON);
+        waitUntilInvisible(CommonLocators.LOADING_SPINNER);
     }
 
     public void fillEmployeeForm(String firstName, String middleName, String lastName) {
-        clearAndType(firstNameInput, firstName);
-        clearAndType(middleNameInput, middleName);
-        clearAndType(lastNameInput, lastName);
+        clearAndType(EmployeeLocators.FIRST_NAME, firstName);
+        clearAndType(EmployeeLocators.MIDDLE_NAME, middleName);
+        clearAndType(EmployeeLocators.LAST_NAME, lastName);
     }
 
     public void saveEmployee() {
-        waitUntilClickable(saveButton).click();
-        waitUntilVisible(personalDetailsTitle);
-        waitUntilHasValue(employeeIdInput);
-        waitUntilInvisible(LOADING_SPINNER);
+        waitUntilClickable(EmployeeLocators.SAVE_BUTTON).click();
+        waitUntilVisible(EmployeeLocators.PERSONAL_DETAILS_TITLE);
+        waitUntilHasValue(EmployeeLocators.EMPLOYEE_ID);
+        waitUntilInvisible(CommonLocators.LOADING_SPINNER);
     }
 
     public boolean isPersonalDetailsDisplayed() {
-        return isDisplayed(personalDetailsTitle);
+        return isDisplayed(EmployeeLocators.PERSONAL_DETAILS_TITLE);
     }
 
     public String getEmployeeId() {
-        return waitUntilHasValue(employeeIdInput);
+        return waitUntilHasValue(EmployeeLocators.EMPLOYEE_ID);
     }
 
     public String getSavedFirstName() {
-        return getInputValue(firstNameInput);
+        return getInputValue(EmployeeLocators.FIRST_NAME);
     }
 
     public String getSavedMiddleName() {
-        return getInputValue(middleNameInput);
+        return getInputValue(EmployeeLocators.MIDDLE_NAME);
     }
 
     public String getSavedLastName() {
-        return getInputValue(lastNameInput);
+        return getInputValue(EmployeeLocators.LAST_NAME);
     }
 
     public boolean preparePersonalDetailsEvidence() {
-        waitUntilHasValue(employeeIdInput);
-        waitUntilInvisible(LOADING_SPINNER);
-        scrollIntoView(firstNameInput);
+        waitUntilHasValue(EmployeeLocators.EMPLOYEE_ID);
+        waitUntilInvisible(CommonLocators.LOADING_SPINNER);
+        scrollIntoView(EmployeeLocators.FIRST_NAME);
         return waitUntilVisualStateIsReady();
     }
 
     public String searchEmployeeById(String employeeId) {
         goToEmployeeList();
-        clearAndType(employeeIdInput, employeeId);
-        waitUntilClickable(searchButton).click();
-        waitUntilInvisible(LOADING_SPINNER);
+        clearAndType(EmployeeLocators.EMPLOYEE_ID, employeeId);
+        waitUntilClickable(EmployeeLocators.SEARCH_BUTTON).click();
+        waitUntilInvisible(CommonLocators.LOADING_SPINNER);
 
-        WebElement resultRow = waitUntilVisible(employeeResultRow(employeeId));
-        scrollIntoView(resultRow);
+        WebElement resultRow = waitUntilVisible(EmployeeLocators.employeeResultRow(employeeId));
+        scrollIntoView(EmployeeLocators.employeeResultRow(employeeId));
         return resultRow.getText();
     }
 
     public void attemptAddEmployeeWithoutFirstName(String lastName) {
         goToPIM();
         clickAddEmployee();
-        clearAndType(firstNameInput, "");
-        clearAndType(middleNameInput, "");
-        clearAndType(lastNameInput, lastName);
-        waitUntilClickable(saveButton).click();
-        waitUntilVisible(firstNameRequiredMessage);
+        clearAndType(EmployeeLocators.FIRST_NAME, "");
+        clearAndType(EmployeeLocators.MIDDLE_NAME, "");
+        clearAndType(EmployeeLocators.LAST_NAME, lastName);
+        waitUntilClickable(EmployeeLocators.SAVE_BUTTON).click();
+        waitUntilVisible(EmployeeLocators.FIRST_NAME_REQUIRED);
     }
 
     public String getFirstNameRequiredMessage() {
-        return waitUntilVisible(firstNameRequiredMessage).getText().trim();
+        return waitUntilVisible(EmployeeLocators.FIRST_NAME_REQUIRED).getText().trim();
     }
 
     public boolean isOnAddEmployeePage() {
-        return isDisplayed(addEmployeeTitle)
+        return isDisplayed(EmployeeLocators.ADD_EMPLOYEE_TITLE)
                 && driver.getCurrentUrl().contains("/pim/addEmployee");
     }
 
     public boolean isPersonalDetailsDisplayedNow() {
-        return isDisplayedNow(personalDetailsTitle);
+        return isDisplayedNow(EmployeeLocators.PERSONAL_DETAILS_TITLE);
     }
 
     public boolean prepareSearchEvidence(String employeeId) {
-        WebElement resultRow = waitUntilVisible(employeeResultRow(employeeId));
-        scrollIntoView(resultRow);
+        waitUntilVisible(EmployeeLocators.employeeResultRow(employeeId));
+        scrollIntoView(EmployeeLocators.employeeResultRow(employeeId));
         return waitUntilVisualStateIsReady();
     }
 
     public boolean prepareFirstNameValidationEvidence() {
-        waitUntilVisible(firstNameRequiredMessage);
-        scrollIntoView(firstNameInput);
+        waitUntilVisible(EmployeeLocators.FIRST_NAME_REQUIRED);
+        scrollIntoView(EmployeeLocators.FIRST_NAME);
         return waitUntilVisualStateIsReady();
-    }
-
-    private By employeeResultRow(String employeeId) {
-        return By.xpath(
-                "//div[contains(@class,'oxd-table-card')]" +
-                "[.//div[normalize-space()='" + employeeId + "']]"
-        );
     }
 
     public String addEmployee(String firstName, String middleName, String lastName) {
         goToPIM();
         clickAddEmployee();
         fillEmployeeForm(firstName, middleName, lastName);
-        String generatedEmployeeId = waitUntilHasValue(employeeIdInput);
+        String generatedEmployeeId = waitUntilHasValue(EmployeeLocators.EMPLOYEE_ID);
         saveEmployee();
         return generatedEmployeeId;
     }
