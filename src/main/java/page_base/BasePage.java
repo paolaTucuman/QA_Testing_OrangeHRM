@@ -6,6 +6,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -75,8 +76,17 @@ public abstract class BasePage {
                     .stream()
                     .noneMatch(this::isDisplayedSafely));
 
+            ((JavascriptExecutor) driver).executeAsyncScript(
+                    "const done = arguments[arguments.length - 1];" +
+                    "const render = () => requestAnimationFrame(() => " +
+                    "requestAnimationFrame(() => done(true)));" +
+                    "if (document.fonts && document.fonts.ready) {" +
+                    "document.fonts.ready.then(render).catch(render);" +
+                    "} else { render(); }"
+            );
+
             return true;
-        } catch (TimeoutException e) {
+        } catch (WebDriverException e) {
             System.out.println(
                     "Advertencia: no se confirmo la estabilidad visual de la evidencia: " +
                     e.getMessage()

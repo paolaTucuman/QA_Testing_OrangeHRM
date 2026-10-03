@@ -81,6 +81,7 @@ public class JiraReporter {
                 return issueKey;
             } else {
                 System.out.println("Error al crear bug: " + response.statusCode());
+                System.out.println("Detalle devuelto por JIRA: " + response.body());
             }
 
         } catch (Exception e) {

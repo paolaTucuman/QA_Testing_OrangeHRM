@@ -89,12 +89,8 @@ public class BaseTest {
                 try {
                     if (JiraReporter.isAutomaticCreationEnabled()
                             && hasGroup(result, "jira-candidate")) {
-                        String titulo = "[AUTO] Bug en: " + result.getName();
-                        String descripcion = "La prueba automatica " + result.getName() + " fallo.\n\n" +
-                                "Razon: " + failureReason + "\n\n" +
-                                "Navegador: " + currentBrowser + "\n" +
-                                "URL: " + ConfigReader.get("base.url") + "\n" +
-                                "Fecha: " + new java.util.Date();
+                        String titulo = buildJiraTitle(result);
+                        String descripcion = buildJiraDescription(result, failureReason);
 
                         String issueKey = JiraReporter.crearBug(titulo, descripcion);
 
@@ -104,9 +100,12 @@ public class BaseTest {
                                     "Reportado automaticamente por Selenium + TestNG");
                             System.out.println("Bug reportado en JIRA: " + issueKey);
                         }
-                    } else {
+                    } else if (!hasGroup(result, "jira-candidate")) {
                         System.out.println(
                                 "Reporte automatico a JIRA omitido: el caso no esta habilitado como candidato");
+                    } else {
+                        System.out.println(
+                                "Reporte automatico a JIRA omitido: la creacion automatica esta deshabilitada");
                     }
                 } catch (Exception e) {
                     System.out.println("No se pudo reportar a JIRA: " + e.getMessage());
@@ -132,6 +131,39 @@ public class BaseTest {
 
     private boolean hasGroup(ITestResult result, String group) {
         return Arrays.asList(result.getMethod().getGroups()).contains(group);
+    }
+
+    private String buildJiraTitle(ITestResult result) {
+        if ("tc11LogoutYValidarSesionCerrada".equals(result.getName())) {
+            return "[AUTO][TC11][Seguridad] PIM visible mediante Back despues del logout";
+        }
+        return "[AUTO] Bug en: " + result.getName();
+    }
+
+    private String buildJiraDescription(ITestResult result, String failureReason) {
+        if ("tc11LogoutYValidarSesionCerrada".equals(result.getName())) {
+            return "Caso: TC11 - Validar cache despues del cierre de sesion\n\n" +
+                    "Precondicion: usuario autenticado con acceso al modulo PIM.\n\n" +
+                    "Pasos para reproducir:\n" +
+                    "1. Iniciar sesion en OrangeHRM.\n" +
+                    "2. Acceder al modulo PIM.\n" +
+                    "3. Cerrar sesion.\n" +
+                    "4. Presionar Back en el navegador.\n\n" +
+                    "Resultado esperado: permanecer en Login sin mostrar contenido protegido.\n\n" +
+                    "Resultado actual: el navegador vuelve a mostrar la pantalla PIM y contenido " +
+                    "de una sesion cerrada.\n\n" +
+                    "Detalle automatico: " + failureReason + "\n" +
+                    "Navegador: " + currentBrowser + "\n" +
+                    "URL observada: " + driver.getCurrentUrl() + "\n" +
+                    "Fecha: " + new java.util.Date() + "\n\n" +
+                    "La captura de evidencia se adjunta automaticamente.";
+        }
+
+        return "La prueba automatica " + result.getName() + " fallo.\n\n" +
+                "Razon: " + failureReason + "\n\n" +
+                "Navegador: " + currentBrowser + "\n" +
+                "URL: " + ConfigReader.get("base.url") + "\n" +
+                "Fecha: " + new java.util.Date();
     }
 
     private void closeDriver() {

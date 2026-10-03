@@ -14,20 +14,22 @@ public class EmployeePage extends BasePage {
 
     public void goToPIM() {
         waitUntilClickable(CommonLocators.PIM_MENU).click();
+        wait.until(currentDriver -> currentDriver.getCurrentUrl()
+                .contains("/pim/viewEmployeeList"));
         waitUntilClickable(EmployeeLocators.SEARCH_BUTTON);
         waitUntilInvisible(CommonLocators.LOADING_SPINNER);
     }
 
     public void clickAddEmployee() {
         waitUntilClickable(EmployeeLocators.ADD_EMPLOYEE_BUTTON).click();
-        waitUntilVisible(EmployeeLocators.ADD_EMPLOYEE_TITLE);
+        wait.until(currentDriver -> currentDriver.getCurrentUrl()
+                .contains("/pim/addEmployee"));
+        waitUntilVisible(EmployeeLocators.FIRST_NAME);
         waitUntilInvisible(CommonLocators.LOADING_SPINNER);
     }
 
     public void goToEmployeeList() {
-        waitUntilClickable(EmployeeLocators.EMPLOYEE_LIST_TAB).click();
-        waitUntilClickable(EmployeeLocators.SEARCH_BUTTON);
-        waitUntilInvisible(CommonLocators.LOADING_SPINNER);
+        goToPIM();
     }
 
     public void fillEmployeeForm(String firstName, String middleName, String lastName) {
@@ -38,13 +40,16 @@ public class EmployeePage extends BasePage {
 
     public void saveEmployee() {
         waitUntilClickable(EmployeeLocators.SAVE_BUTTON).click();
-        waitUntilVisible(EmployeeLocators.PERSONAL_DETAILS_TITLE);
+        wait.until(currentDriver -> currentDriver.getCurrentUrl()
+                .contains("/pim/viewPersonalDetails/empNumber/"));
+        waitUntilVisible(EmployeeLocators.FIRST_NAME);
         waitUntilHasValue(EmployeeLocators.EMPLOYEE_ID);
         waitUntilInvisible(CommonLocators.LOADING_SPINNER);
     }
 
     public boolean isPersonalDetailsDisplayed() {
-        return isDisplayed(EmployeeLocators.PERSONAL_DETAILS_TITLE);
+        return driver.getCurrentUrl().contains("/pim/viewPersonalDetails/empNumber/")
+                && isDisplayed(EmployeeLocators.FIRST_NAME);
     }
 
     public String getEmployeeId() {
@@ -72,7 +77,7 @@ public class EmployeePage extends BasePage {
 
     public String searchEmployeeById(String employeeId) {
         goToEmployeeList();
-        clearAndType(EmployeeLocators.EMPLOYEE_ID, employeeId);
+        clearAndType(EmployeeLocators.SEARCH_EMPLOYEE_ID, employeeId);
         waitUntilClickable(EmployeeLocators.SEARCH_BUTTON).click();
         waitUntilInvisible(CommonLocators.LOADING_SPINNER);
 
@@ -81,8 +86,8 @@ public class EmployeePage extends BasePage {
         return resultRow.getText();
     }
 
-    public String getSearchResultSummary() {
-        return waitUntilVisible(EmployeeLocators.SEARCH_RESULT_SUMMARY).getText().trim();
+    public int getSearchResultCount() {
+        return driver.findElements(EmployeeLocators.RESULT_ROWS).size();
     }
 
     public void attemptAddEmployeeWithoutFirstName(String lastName) {
@@ -100,12 +105,13 @@ public class EmployeePage extends BasePage {
     }
 
     public boolean isOnAddEmployeePage() {
-        return isDisplayed(EmployeeLocators.ADD_EMPLOYEE_TITLE)
-                && driver.getCurrentUrl().contains("/pim/addEmployee");
+        return driver.getCurrentUrl().contains("/pim/addEmployee")
+                && isDisplayed(EmployeeLocators.FIRST_NAME);
     }
 
     public boolean isPersonalDetailsDisplayedNow() {
-        return isDisplayedNow(EmployeeLocators.PERSONAL_DETAILS_TITLE);
+        return driver.getCurrentUrl().contains("/pim/viewPersonalDetails/empNumber/")
+                && isDisplayedNow(EmployeeLocators.FIRST_NAME);
     }
 
     public boolean prepareSearchEvidence(String employeeId) {

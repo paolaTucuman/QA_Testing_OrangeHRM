@@ -43,7 +43,7 @@ public class EmployeeTest extends BaseTest {
 
     @Test(dataProvider = "datosTC06", groups = {"automated", "positive"})
     public void tc06RegistrarEmpleadoConDatosValidos(Map<String, String> datos) {
-        validarResultadoConfigurado(datos, "success");
+        validarResultadoConfigurado(datos, "success", "EMPLOYEE_PROFILE");
         loginAsAdmin("TC06");
 
         String suffix = LocalDateTime.now().format(UNIQUE_SUFFIX);
@@ -63,8 +63,8 @@ public class EmployeeTest extends BaseTest {
         EvidenceReporter.recordComparison("TC06", getCurrentBrowser(),
                 "Employee ID generado", true, !generatedEmployeeId.isBlank());
         EvidenceReporter.recordComparison("TC06", getCurrentBrowser(),
-                "Pantalla final", datos.get("expectedMessage"),
-                personalDetailsDisplayed ? "Personal Details" : "");
+                "Estado final", datos.get("expectedState"),
+                personalDetailsDisplayed ? "EMPLOYEE_PROFILE" : "UNKNOWN");
         EvidenceReporter.recordComparison("TC06", getCurrentBrowser(),
                 "Employee ID guardado", generatedEmployeeId, savedEmployeeId);
         EvidenceReporter.recordComparison("TC06", getCurrentBrowser(),
@@ -99,7 +99,7 @@ public class EmployeeTest extends BaseTest {
 
     @Test(dataProvider = "datosTC07", groups = {"automated", "positive"})
     public void tc07BuscarEmpleadoCreadoPorId(Map<String, String> datos) {
-        validarResultadoConfigurado(datos, "success");
+        validarResultadoConfigurado(datos, "success", "ONE_EMPLOYEE_RESULT");
         Assert.assertEquals(valorRequerido(datos, "searchBy"), "employeeId",
                 "TC07: searchBy debe ser employeeId");
         loginAsAdmin("TC07");
@@ -116,12 +116,11 @@ public class EmployeeTest extends BaseTest {
                 "TC07: OrangeHRM no genero un Employee ID para la busqueda");
 
         String resultText = employeePage.searchEmployeeById(employeeId);
-        String resultSummary = employeePage.getSearchResultSummary();
+        int resultCount = employeePage.getSearchResultCount();
 
         boolean exactEmployeeIdFound = containsExactLine(resultText, employeeId);
         boolean firstNameFound = resultText.contains(firstName);
         boolean lastNameFound = resultText.contains(lastName);
-        boolean expectedMessageFound = resultSummary.equals(datos.get("expectedMessage"));
 
         EvidenceReporter.recordComparison("TC07", getCurrentBrowser(),
                 "Employee ID exacto en resultado", true, exactEmployeeIdFound);
@@ -130,8 +129,7 @@ public class EmployeeTest extends BaseTest {
         EvidenceReporter.recordComparison("TC07", getCurrentBrowser(),
                 "Last Name en resultado", true, lastNameFound);
         EvidenceReporter.recordComparison("TC07", getCurrentBrowser(),
-                "Resumen de resultados", datos.get("expectedMessage"),
-                resultSummary);
+                "Cantidad de resultados", 1, resultCount);
 
         Assert.assertTrue(exactEmployeeIdFound,
                 "TC07: la fila encontrada no contiene el Employee ID exacto");
@@ -139,8 +137,8 @@ public class EmployeeTest extends BaseTest {
                 "TC07: la fila encontrada no contiene el First Name creado");
         Assert.assertTrue(lastNameFound,
                 "TC07: la fila encontrada no contiene el Last Name creado");
-        Assert.assertTrue(expectedMessageFound,
-                "TC07: no se mostro el resumen de un registro encontrado");
+        Assert.assertEquals(resultCount, 1,
+                "TC07: la busqueda debe devolver exactamente un empleado");
 
         boolean visualStateReady = employeePage.prepareSearchEvidence(employeeId);
         String screenshotPath = ScreenshotHelper.takeScreenshot(
@@ -154,7 +152,7 @@ public class EmployeeTest extends BaseTest {
 
     @Test(dataProvider = "datosTC08", groups = {"automated", "negative"})
     public void tc08ValidarFirstNameObligatorio(Map<String, String> datos) {
-        validarResultadoConfigurado(datos, "validation");
+        validarResultadoConfigurado(datos, "validation", "FIRST_NAME_VALIDATION");
         loginAsAdmin("TC08");
 
         String suffix = LocalDateTime.now().format(UNIQUE_SUFFIX);
@@ -168,18 +166,19 @@ public class EmployeeTest extends BaseTest {
         employeePage.attemptAddEmployeeWithoutFirstName(lastName);
 
         String requiredMessage = employeePage.getFirstNameRequiredMessage();
+        boolean firstNameValidationVisible = !requiredMessage.isBlank();
         boolean addEmployeePageDisplayed = employeePage.isOnAddEmployeePage();
         boolean personalDetailsDisplayed = employeePage.isPersonalDetailsDisplayedNow();
 
         EvidenceReporter.recordComparison("TC08", getCurrentBrowser(),
-                "Mensaje de First Name", datos.get("expectedMessage"), requiredMessage);
+                "Validacion asociada a First Name", true, firstNameValidationVisible);
         EvidenceReporter.recordComparison("TC08", getCurrentBrowser(),
                 "Formulario Add Employee visible", true, addEmployeePageDisplayed);
         EvidenceReporter.recordComparison("TC08", getCurrentBrowser(),
                 "Personal Details visible", false, personalDetailsDisplayed);
 
-        Assert.assertEquals(requiredMessage, datos.get("expectedMessage"),
-                "TC08: no se mostro Required para First Name");
+        Assert.assertTrue(firstNameValidationVisible,
+                "TC08: no se mostro la validacion asociada a First Name");
         Assert.assertTrue(addEmployeePageDisplayed,
                 "TC08: el formulario Add Employee no permanecio visible");
         Assert.assertFalse(personalDetailsDisplayed,
@@ -229,7 +228,7 @@ public class EmployeeTest extends BaseTest {
 
         List<String> requeridas = List.of(
                 "caseId", "dataId", "firstNameMode", "firstNamePrefix", "middleName",
-                "lastNamePrefix", "searchBy", "expectedResult", "expectedMessage"
+                "lastNamePrefix", "searchBy", "expectedResult", "expectedState"
         );
         if (!filas.get(0).keySet().containsAll(requeridas)) {
             throw new IllegalStateException(
@@ -248,11 +247,13 @@ public class EmployeeTest extends BaseTest {
         };
     }
 
-    private void validarResultadoConfigurado(Map<String, String> datos, String esperado) {
-        Assert.assertEquals(datos.get("expectedResult"), esperado,
+    private void validarResultadoConfigurado(
+            Map<String, String> datos, String resultadoEsperado, String estadoEsperado) {
+        Assert.assertEquals(datos.get("expectedResult"), resultadoEsperado,
                 datos.get("caseId") + ": expectedResult no coincide con el tipo de prueba");
         valorRequerido(datos, "dataId");
-        valorRequerido(datos, "expectedMessage");
+        Assert.assertEquals(valorRequerido(datos, "expectedState"), estadoEsperado,
+                datos.get("caseId") + ": expectedState no coincide con el escenario");
     }
 
     private String valorRequerido(Map<String, String> datos, String columna) {

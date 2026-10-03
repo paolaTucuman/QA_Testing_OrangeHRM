@@ -157,17 +157,25 @@ de incidencia predeterminado es `Bug`.
 
 ## Fase 11 Logout y sesion cerrada TC11
 
-Estado: implementada y validada funcional y visualmente en Chrome el 2026-10-02:
-1 prueba aprobada, 0 fallidas y 0 omitidas. Logout mostro Login y la navegacion
-hacia atras no recupero acceso funcional a PIM.
+Estado: ajustada para validacion. La primera ejecucion confirmo que Logout mostro
+Login y que la URL protegida no recupero acceso funcional. Falta ejecutar el
+alcance ampliado que comprueba tambien la exposicion visual por cache o historial.
 
 - Agregar localizadores del menu de usuario y Logout.
 - Iniciar sesion y acceder a una pagina protegida.
 - Cerrar sesion y validar que Login vuelva a mostrarse.
-- Navegar hacia atras y comprobar que no exista acceso funcional autenticado.
+- Navegar hacia atras y comprobar inmediatamente que Login siga visible y que no
+  se muestre PIM ni informacion protegida almacenada en cache o historial.
+- Solicitar directamente la URL protegida y comprobar que vuelva a exigir Login.
 - Registrar comparaciones Esperado/Actual y dos evidencias visuales.
 - Marcar TC11 como unico candidato a reporte automatico en Jira.
 - Ejecutar inicialmente en Chrome desde la matriz de Excel.
+
+Decision de implementacion: TC11 separa dos riesgos. La captura
+`TC11_Logout_Back` se toma inmediatamente despues de Back para detectar una
+debilidad de cache aunque la pagina no permita operar. Luego se solicita la URL
+protegida para validar la invalidacion funcional de la sesion. El caso falla si
+se expone PIM en el historial o si se recupera acceso sin credenciales.
 
 ## Fase 12 Regresion final y cierre de automatizacion
 

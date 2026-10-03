@@ -4,8 +4,8 @@ import org.openqa.selenium.By;
 
 public final class DashboardLocators {
 
-    public static final By DASHBOARD_TITLE = By.xpath(
-            "//h6[normalize-space()='Dashboard']"
+    public static final By MODULE_HEADER = By.cssSelector(
+            "h6.oxd-topbar-header-breadcrumb-module"
     );
 
     private DashboardLocators() {

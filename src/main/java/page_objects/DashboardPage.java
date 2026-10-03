@@ -1,6 +1,7 @@
 package page_objects;
 
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.TimeoutException;
 import page_base.BasePage;
 import page_locators.CommonLocators;
 import page_locators.DashboardLocators;
@@ -13,7 +14,13 @@ public class DashboardPage extends BasePage {
     }
 
     public boolean isDashboardDisplayed() {
-        return isDisplayed(DashboardLocators.DASHBOARD_TITLE);
+        try {
+            return wait.until(currentDriver ->
+                    currentDriver.getCurrentUrl().contains("/dashboard/index")
+                            && isDisplayedNow(CommonLocators.USER_DROPDOWN));
+        } catch (TimeoutException e) {
+            return false;
+        }
     }
 
     public boolean isAuthenticatedMenuDisplayed() {
@@ -21,7 +28,8 @@ public class DashboardPage extends BasePage {
     }
 
     public boolean isDashboardDisplayedNow() {
-        return isDisplayedNow(DashboardLocators.DASHBOARD_TITLE);
+        return driver.getCurrentUrl().contains("/dashboard/index")
+                && isDisplayedNow(CommonLocators.USER_DROPDOWN);
     }
 
     public void logout() {
@@ -35,13 +43,27 @@ public class DashboardPage extends BasePage {
     }
 
     public boolean waitForSessionOrLoginState() {
-        wait.until(currentDriver -> isDisplayedNow(LoginLocators.USERNAME)
-                || isDisplayedNow(CommonLocators.PIM_MENU));
-        return waitUntilVisualStateIsReady();
+        try {
+            wait.until(currentDriver -> isCompleteLoginFormDisplayedNow()
+                    || isDisplayedNow(CommonLocators.PIM_MENU));
+            return waitUntilVisualStateIsReady();
+        } catch (TimeoutException e) {
+            System.out.println(
+                    "Advertencia: no se completo el estado de Login o sesion autenticada"
+            );
+            return false;
+        }
+    }
+
+    private boolean isCompleteLoginFormDisplayedNow() {
+        return isDisplayedNow(LoginLocators.USERNAME)
+                && isDisplayedNow(LoginLocators.PASSWORD)
+                && isDisplayedNow(LoginLocators.LOGIN_BUTTON);
     }
 
     public boolean prepareDashboardEvidence() {
-        waitUntilVisible(DashboardLocators.DASHBOARD_TITLE);
+        waitUntilVisible(DashboardLocators.MODULE_HEADER);
+        waitUntilVisible(CommonLocators.USER_DROPDOWN);
         waitUntilVisible(CommonLocators.PIM_MENU);
         return waitUntilVisualStateIsReady();
     }

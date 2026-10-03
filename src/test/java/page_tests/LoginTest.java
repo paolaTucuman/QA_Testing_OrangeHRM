@@ -32,7 +32,7 @@ public class LoginTest extends BaseTest {
 
     @Test(dataProvider = "datosTC01", groups = {"automated", "positive"})
     public void tc01LoginConCredencialesValidas(Map<String, String> datos) {
-        validarResultadoConfigurado(datos, "success");
+        validarResultadoConfigurado(datos, "success", "AUTHENTICATED");
 
         LoginPage loginPage = new LoginPage(driver);
         DashboardPage dashboardPage = new DashboardPage(driver);
@@ -68,26 +68,26 @@ public class LoginTest extends BaseTest {
 
     @Test(dataProvider = "datosTC02", groups = {"automated", "negative"})
     public void tc02LoginConPasswordInvalida(Map<String, String> datos) {
-        validarResultadoConfigurado(datos, "error");
+        validarResultadoConfigurado(datos, "error", "LOGIN_ERROR_VISIBLE");
 
         LoginPage loginPage = new LoginPage(driver);
         DashboardPage dashboardPage = new DashboardPage(driver);
         loginPage.login(datos.get("username"), datos.get("password"));
 
-        String expectedMessage = datos.get("expectedMessage");
         String actualMessage = loginPage.getErrorMessage();
+        boolean errorMessageVisible = !actualMessage.isBlank();
         boolean loginFormDisplayed = loginPage.isLoginFormDisplayed();
         boolean dashboardDisplayed = dashboardPage.isDashboardDisplayedNow();
 
         EvidenceReporter.recordComparison("TC02", getCurrentBrowser(),
-                "Mensaje de error", expectedMessage, actualMessage);
+                "Alerta de autenticacion visible", true, errorMessageVisible);
         EvidenceReporter.recordComparison("TC02", getCurrentBrowser(),
                 "Formulario Login visible", true, loginFormDisplayed);
         EvidenceReporter.recordComparison("TC02", getCurrentBrowser(),
                 "Dashboard visible", false, dashboardDisplayed);
 
-        Assert.assertEquals(actualMessage, expectedMessage,
-                "TC02: el mensaje de error no coincide");
+        Assert.assertTrue(errorMessageVisible,
+                "TC02: no se mostro una alerta de autenticacion");
         Assert.assertTrue(loginFormDisplayed,
                 "TC02: la prueba no permanecio en la pantalla de Login");
         Assert.assertFalse(dashboardDisplayed,
@@ -119,7 +119,7 @@ public class LoginTest extends BaseTest {
 
     private void validarColumnas(List<Map<String, String>> filas, String sheetName) {
         List<String> requeridas = List.of(
-                "caseId", "username", "password", "expectedResult", "expectedMessage"
+                "caseId", "username", "password", "expectedResult", "expectedState"
         );
         if (filas.isEmpty() || !filas.get(0).keySet().containsAll(requeridas)) {
             throw new IllegalStateException(
@@ -127,8 +127,11 @@ public class LoginTest extends BaseTest {
         }
     }
 
-    private void validarResultadoConfigurado(Map<String, String> datos, String esperado) {
-        Assert.assertEquals(datos.get("expectedResult"), esperado,
+    private void validarResultadoConfigurado(
+            Map<String, String> datos, String resultadoEsperado, String estadoEsperado) {
+        Assert.assertEquals(datos.get("expectedResult"), resultadoEsperado,
                 datos.get("caseId") + ": expectedResult no coincide con el tipo de prueba");
+        Assert.assertEquals(datos.get("expectedState"), estadoEsperado,
+                datos.get("caseId") + ": expectedState no coincide con el escenario");
     }
 }

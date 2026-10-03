@@ -86,30 +86,55 @@ public class SessionTest extends BaseTest {
         driver.navigate().back();
         boolean backStateReady = dashboardPage.waitForSessionOrLoginState();
 
+        String backUrl = driver.getCurrentUrl();
+        boolean loginUrlAfterBack = backUrl.contains("/auth/login");
+        boolean loginVisibleAfterBack = loginPage.isLoginFormDisplayedNow();
+        boolean protectedViewAfterBack = dashboardPage.isAuthenticatedNavigationDisplayedNow();
+        String actualBackPage = protectedViewAfterBack
+                ? "PIM"
+                : loginUrlAfterBack ? "Login" : backUrl;
+        String expectedBackPage = valorRequerido(datos, "expectedBackPage");
+        boolean expectedProtectedViewAfterBack = parseBoolean(
+                datos, "expectedProtectedViewAfterBack");
+
+        EvidenceReporter.recordComparison("TC11", getCurrentBrowser(),
+                "Pantalla inmediatamente despues de Back",
+                expectedBackPage, actualBackPage);
+        EvidenceReporter.recordComparison("TC11", getCurrentBrowser(),
+                "Contenido protegido visible despues de Back",
+                expectedProtectedViewAfterBack, protectedViewAfterBack);
+
+        String backScreenshot = ScreenshotHelper.takeScreenshot(
+                driver,
+                "TC11_Logout_Back_" + getCurrentBrowser()
+        );
+        boolean backEvidenceReady = backStateReady
+                && loginVisibleAfterBack
+                && !protectedViewAfterBack;
+        EvidenceReporter.recordScreenshot(
+                "TC11", getCurrentBrowser(), backScreenshot, backEvidenceReady
+        );
+
+        Assert.assertEquals(actualBackPage, expectedBackPage,
+                "TC11: Back mostro una pantalla distinta de la esperada");
+        Assert.assertEquals(protectedViewAfterBack, expectedProtectedViewAfterBack,
+                "TC11: Back expuso contenido protegido desde el historial o la cache");
+
         driver.get(protectedUrl);
-        boolean protectedRouteStateReady = dashboardPage.waitForSessionOrLoginState();
+        dashboardPage.waitForSessionOrLoginState();
         boolean functionalAccessRecovered = driver.getCurrentUrl().contains("/pim/")
                 && dashboardPage.isAuthenticatedNavigationDisplayedNow();
         boolean loginRequiredAgain = loginPage.isLoginFormDisplayedNow();
         boolean expectedBackAccess = parseBoolean(datos, "expectedBackAccess");
 
         EvidenceReporter.recordComparison("TC11", getCurrentBrowser(),
-                "Acceso funcional recuperado despues de Back",
+                "Acceso funcional al solicitar la URL protegida",
                 expectedBackAccess, functionalAccessRecovered);
         EvidenceReporter.recordComparison("TC11", getCurrentBrowser(),
                 "Login requerido para volver a PIM", true, loginRequiredAgain);
 
-        boolean backEvidenceReady = backStateReady && protectedRouteStateReady;
-        String backScreenshot = ScreenshotHelper.takeScreenshot(
-                driver,
-                "TC11_Logout_Back_" + getCurrentBrowser()
-        );
-        EvidenceReporter.recordScreenshot(
-                "TC11", getCurrentBrowser(), backScreenshot, backEvidenceReady
-        );
-
         Assert.assertEquals(functionalAccessRecovered, expectedBackAccess,
-                "TC11: acceso funcional despues de Back. Esperado="
+                "TC11: acceso funcional al solicitar la URL protegida. Esperado="
                         + expectedBackAccess + ", Actual=" + functionalAccessRecovered);
         Assert.assertTrue(loginRequiredAgain,
                 "TC11: la URL protegida no exigio iniciar sesion nuevamente");
@@ -118,7 +143,8 @@ public class SessionTest extends BaseTest {
     private void validarColumnas(List<Map<String, String>> filas, String sheetName) {
         List<String> requeridas = List.of(
                 "caseId", "dataId", "protectedSection",
-                "expectedLogoutPage", "expectedBackAccess"
+                "expectedLogoutPage", "expectedBackAccess",
+                "expectedBackPage", "expectedProtectedViewAfterBack"
         );
         if (filas.isEmpty() || !filas.get(0).keySet().containsAll(requeridas)) {
             throw new IllegalStateException(
@@ -133,7 +159,11 @@ public class SessionTest extends BaseTest {
         Assert.assertEquals(valorRequerido(datos, "expectedLogoutPage"), "Login",
                 "TC11: expectedLogoutPage debe ser Login");
         Assert.assertFalse(parseBoolean(datos, "expectedBackAccess"),
-                "TC11: se espera que Back no recupere acceso funcional");
+                "TC11: se espera que la URL protegida no recupere acceso funcional");
+        Assert.assertEquals(valorRequerido(datos, "expectedBackPage"), "Login",
+                "TC11: despues de Back se espera continuar en Login");
+        Assert.assertFalse(parseBoolean(datos, "expectedProtectedViewAfterBack"),
+                "TC11: Back no debe mostrar contenido protegido desde la cache");
     }
 
     private boolean parseBoolean(Map<String, String> datos, String columna) {
