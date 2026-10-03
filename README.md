@@ -15,7 +15,7 @@ Actualmente el proyecto incluye:
 - TC06: registro de un empleado con datos validos.
 - TC07: busqueda por ID de un empleado creado por la propia prueba.
 - TC08: validacion de First Name obligatorio.
-- Datos de Login dirigidos desde `TestData.xlsx`.
+- Datos funcionales y matriz de ejecucion dirigidos desde `TestData.xlsx`.
 - Evidencias de exito y capturas automaticas ante fallos.
 - Regresion secuencial en Chrome, Firefox y Edge.
 - Integracion opcional con Jira, desactivada por defecto.
@@ -54,9 +54,10 @@ mvn clean test
 
 Maven ejecuta la suite definida en `testing.xml`. Los reportes, capturas y archivos generados se guardan en directorios ignorados por Git, como `target/` y `test-output/`.
 
-La suite ejecuta los cinco casos del grupo `automated` en Chrome, Firefox y Edge,
-en ese orden y sin paralelismo. El resultado esperado es de 15 ejecuciones:
-5 casos x 3 navegadores.
+La suite recorre Chrome, Firefox y Edge, en ese orden y sin paralelismo. Antes de
+abrir un navegador, `ExecutionFilter` consulta la hoja `execution` y conserva
+solo las combinaciones caso/navegador marcadas con `TRUE`. Con la configuracion
+inicial se esperan 15 ejecuciones: 5 casos x 3 navegadores.
 
 Desde Eclipse tambien se puede ejecutar haciendo clic derecho en `testing.xml` y
 seleccionando `Run As > TestNG Suite`. Para validar la regresion completa no se
@@ -80,7 +81,25 @@ la interfaz queda estable se registra como `LISTA`.
 
 ## Datos de prueba
 
-`src/test/resources/TestData.xlsx` contiene datos destinados exclusivamente a la instancia publica de demostracion. No se deben agregar credenciales personales, corporativas ni tokens a ese archivo.
+`src/test/resources/TestData.xlsx` contiene tres hojas:
+
+- `execution`: una fila por caso. `enabled=FALSE` excluye el caso completo;
+  `chrome`, `firefox` y `edge` permiten seleccionar navegadores por separado;
+  `dataSheet` indica de que hoja se obtienen los inputs.
+- `login`: credenciales de demostracion y resultados esperados de TC01 y TC02.
+- `employee`: datos no sensibles, modos de generacion y resultados esperados de
+  TC06, TC07 y TC08.
+
+Solo deben utilizarse `TRUE` o `FALSE` en las columnas de control. Los IDs de
+caso y los encabezados no deben renombrarse, porque se validan antes de ejecutar.
+Los nombres `AUTO` reciben un sufijo de fecha/hora para evitar registros
+duplicados; `BLANK` representa un valor intencionalmente vacio.
+
+El libro contiene datos destinados exclusivamente a la instancia publica de
+demostracion. No se deben agregar credenciales personales, corporativas, tokens
+de Jira ni otros secretos. Las credenciales administrativas y de Jira pertenecen
+a la configuracion local ignorada por Git o, en CI, a variables/secretos del
+entorno.
 
 ## Seguridad
 

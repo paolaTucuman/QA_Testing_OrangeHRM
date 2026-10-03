@@ -2,8 +2,12 @@ package page_tests;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import page_base.BaseTest;
@@ -12,21 +16,40 @@ import page_objects.EmployeePage;
 import page_objects.LoginPage;
 import page_utils.ConfigReader;
 import page_utils.EvidenceReporter;
+import page_utils.ExcelReader;
+import page_utils.ExecutionControl;
 import page_utils.ScreenshotHelper;
 
 public class EmployeeTest extends BaseTest {
 
     private static final DateTimeFormatter UNIQUE_SUFFIX =
             DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    private static final String EXCEL_PATH = ConfigReader.get("excel.path");
 
-    @Test(groups = {"automated", "positive"})
-    public void tc06RegistrarEmpleadoConDatosValidos() {
+    @DataProvider(name = "datosTC06")
+    public Object[][] obtenerDatosTC06() {
+        return datosDelCaso("TC06");
+    }
+
+    @DataProvider(name = "datosTC07")
+    public Object[][] obtenerDatosTC07() {
+        return datosDelCaso("TC07");
+    }
+
+    @DataProvider(name = "datosTC08")
+    public Object[][] obtenerDatosTC08() {
+        return datosDelCaso("TC08");
+    }
+
+    @Test(dataProvider = "datosTC06", groups = {"automated", "positive"})
+    public void tc06RegistrarEmpleadoConDatosValidos(Map<String, String> datos) {
+        validarResultadoConfigurado(datos, "success");
         loginAsAdmin("TC06");
 
         String suffix = LocalDateTime.now().format(UNIQUE_SUFFIX);
-        String firstName = "Auto" + suffix;
-        String middleName = "QA";
-        String lastName = "TC06" + suffix;
+        String firstName = construirFirstName(datos, suffix);
+        String middleName = datos.get("middleName");
+        String lastName = valorRequerido(datos, "lastNamePrefix") + suffix;
 
         EmployeePage employeePage = new EmployeePage(driver);
         String generatedEmployeeId = employeePage.addEmployee(firstName, middleName, lastName);
@@ -40,7 +63,8 @@ public class EmployeeTest extends BaseTest {
         EvidenceReporter.recordComparison("TC06", getCurrentBrowser(),
                 "Employee ID generado", true, !generatedEmployeeId.isBlank());
         EvidenceReporter.recordComparison("TC06", getCurrentBrowser(),
-                "Pantalla Personal Details visible", true, personalDetailsDisplayed);
+                "Pantalla final", datos.get("expectedMessage"),
+                personalDetailsDisplayed ? "Personal Details" : "");
         EvidenceReporter.recordComparison("TC06", getCurrentBrowser(),
                 "Employee ID guardado", generatedEmployeeId, savedEmployeeId);
         EvidenceReporter.recordComparison("TC06", getCurrentBrowser(),
@@ -73,14 +97,17 @@ public class EmployeeTest extends BaseTest {
         );
     }
 
-    @Test(groups = {"automated", "positive"})
-    public void tc07BuscarEmpleadoCreadoPorId() {
+    @Test(dataProvider = "datosTC07", groups = {"automated", "positive"})
+    public void tc07BuscarEmpleadoCreadoPorId(Map<String, String> datos) {
+        validarResultadoConfigurado(datos, "success");
+        Assert.assertEquals(valorRequerido(datos, "searchBy"), "employeeId",
+                "TC07: searchBy debe ser employeeId");
         loginAsAdmin("TC07");
 
         String suffix = LocalDateTime.now().format(UNIQUE_SUFFIX);
-        String firstName = "Auto" + suffix;
-        String middleName = "QA";
-        String lastName = "TC07" + suffix;
+        String firstName = construirFirstName(datos, suffix);
+        String middleName = datos.get("middleName");
+        String lastName = valorRequerido(datos, "lastNamePrefix") + suffix;
 
         EmployeePage employeePage = new EmployeePage(driver);
         String employeeId = employeePage.addEmployee(firstName, middleName, lastName);
@@ -93,6 +120,7 @@ public class EmployeeTest extends BaseTest {
         boolean exactEmployeeIdFound = containsExactLine(resultText, employeeId);
         boolean firstNameFound = resultText.contains(firstName);
         boolean lastNameFound = resultText.contains(lastName);
+        boolean expectedMessageFound = resultText.contains(datos.get("expectedMessage"));
 
         EvidenceReporter.recordComparison("TC07", getCurrentBrowser(),
                 "Employee ID exacto en resultado", true, exactEmployeeIdFound);
@@ -100,6 +128,9 @@ public class EmployeeTest extends BaseTest {
                 "First Name en resultado", true, firstNameFound);
         EvidenceReporter.recordComparison("TC07", getCurrentBrowser(),
                 "Last Name en resultado", true, lastNameFound);
+        EvidenceReporter.recordComparison("TC07", getCurrentBrowser(),
+                "Resumen de resultados", datos.get("expectedMessage"),
+                expectedMessageFound ? datos.get("expectedMessage") : resultText);
 
         Assert.assertTrue(exactEmployeeIdFound,
                 "TC07: la fila encontrada no contiene el Employee ID exacto");
@@ -107,6 +138,8 @@ public class EmployeeTest extends BaseTest {
                 "TC07: la fila encontrada no contiene el First Name creado");
         Assert.assertTrue(lastNameFound,
                 "TC07: la fila encontrada no contiene el Last Name creado");
+        Assert.assertTrue(expectedMessageFound,
+                "TC07: no se mostro el resumen de un registro encontrado");
 
         boolean visualStateReady = employeePage.prepareSearchEvidence(employeeId);
         String screenshotPath = ScreenshotHelper.takeScreenshot(
@@ -118,12 +151,17 @@ public class EmployeeTest extends BaseTest {
         );
     }
 
-    @Test(groups = {"automated", "negative"})
-    public void tc08ValidarFirstNameObligatorio() {
+    @Test(dataProvider = "datosTC08", groups = {"automated", "negative"})
+    public void tc08ValidarFirstNameObligatorio(Map<String, String> datos) {
+        validarResultadoConfigurado(datos, "validation");
         loginAsAdmin("TC08");
 
         String suffix = LocalDateTime.now().format(UNIQUE_SUFFIX);
-        String lastName = "TC08" + suffix;
+        String firstName = construirFirstName(datos, suffix);
+        String lastName = valorRequerido(datos, "lastNamePrefix") + suffix;
+
+        Assert.assertTrue(firstName.isBlank(),
+                "TC08: firstNameMode debe producir un First Name vacio");
 
         EmployeePage employeePage = new EmployeePage(driver);
         employeePage.attemptAddEmployeeWithoutFirstName(lastName);
@@ -133,13 +171,13 @@ public class EmployeeTest extends BaseTest {
         boolean personalDetailsDisplayed = employeePage.isPersonalDetailsDisplayedNow();
 
         EvidenceReporter.recordComparison("TC08", getCurrentBrowser(),
-                "Mensaje de First Name", "Required", requiredMessage);
+                "Mensaje de First Name", datos.get("expectedMessage"), requiredMessage);
         EvidenceReporter.recordComparison("TC08", getCurrentBrowser(),
                 "Formulario Add Employee visible", true, addEmployeePageDisplayed);
         EvidenceReporter.recordComparison("TC08", getCurrentBrowser(),
                 "Personal Details visible", false, personalDetailsDisplayed);
 
-        Assert.assertEquals(requiredMessage, "Required",
+        Assert.assertEquals(requiredMessage, datos.get("expectedMessage"),
                 "TC08: no se mostro Required para First Name");
         Assert.assertTrue(addEmployeePageDisplayed,
                 "TC08: el formulario Add Employee no permanecio visible");
@@ -166,6 +204,63 @@ public class EmployeeTest extends BaseTest {
         DashboardPage dashboardPage = new DashboardPage(driver);
         Assert.assertTrue(dashboardPage.isDashboardDisplayed(),
                 caseId + ": no fue posible iniciar sesion");
+    }
+
+    private Object[][] datosDelCaso(String caseId) {
+        String sheetName = ExecutionControl.getDataSheet(caseId);
+        List<Map<String, String>> filas = ExcelReader.leerDatos(EXCEL_PATH, sheetName);
+        validarColumnas(filas, sheetName);
+
+        Map<String, String> caso = filas.stream()
+                .filter(fila -> caseId.equalsIgnoreCase(fila.get("caseId")))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "No se encontraron datos para " + caseId + " en " + EXCEL_PATH));
+
+        System.out.println("Datos cargados: " + caso.get("dataId") + " para " + caseId);
+        return new Object[][] {{caso}};
+    }
+
+    private void validarColumnas(List<Map<String, String>> filas, String sheetName) {
+        if (filas.isEmpty()) {
+            throw new IllegalStateException("La hoja " + sheetName + " no contiene datos");
+        }
+
+        List<String> requeridas = List.of(
+                "caseId", "dataId", "firstNameMode", "firstNamePrefix", "middleName",
+                "lastNamePrefix", "searchBy", "expectedResult", "expectedMessage"
+        );
+        if (!filas.get(0).keySet().containsAll(requeridas)) {
+            throw new IllegalStateException(
+                    "La hoja " + sheetName + " debe contener las columnas: " + requeridas);
+        }
+    }
+
+    private String construirFirstName(Map<String, String> datos, String suffix) {
+        String mode = valorRequerido(datos, "firstNameMode").toUpperCase(Locale.ROOT);
+        return switch (mode) {
+            case "AUTO" -> valorRequerido(datos, "firstNamePrefix") + suffix;
+            case "BLANK" -> "";
+            case "FIXED" -> valorRequerido(datos, "firstNamePrefix");
+            default -> throw new IllegalStateException(
+                    datos.get("caseId") + ": firstNameMode no soportado: " + mode);
+        };
+    }
+
+    private void validarResultadoConfigurado(Map<String, String> datos, String esperado) {
+        Assert.assertEquals(datos.get("expectedResult"), esperado,
+                datos.get("caseId") + ": expectedResult no coincide con el tipo de prueba");
+        valorRequerido(datos, "dataId");
+        valorRequerido(datos, "expectedMessage");
+    }
+
+    private String valorRequerido(Map<String, String> datos, String columna) {
+        String valor = datos.get(columna);
+        if (valor == null || valor.isBlank()) {
+            throw new IllegalStateException(
+                    datos.get("caseId") + ": falta un valor para " + columna);
+        }
+        return valor.trim();
     }
 
     private boolean containsExactLine(String text, String expectedLine) {

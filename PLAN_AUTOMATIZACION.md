@@ -119,13 +119,21 @@ en Chrome, Firefox y Edge.
 
 ## Fase 9 Control de ejecucion y datos desde Excel
 
-Estado: pendiente de iniciar despues de validar la fase 8.
+Estado: implementada el 2026-10-02 y pendiente de validar mediante la regresion
+controlada en Eclipse.
 
 - Agregar las hojas `execution` y `employee` a `TestData.xlsx`.
 - Mantener `login` para los datos de TC01 y TC02.
 - Controlar por caso si se ejecuta en Chrome, Firefox y Edge.
 - Mover los inputs no sensibles de TC06, TC07 y TC08 al Excel.
 - Validar columnas, casos desconocidos y configuraciones incompletas.
+
+Decision de implementacion: TestNG conserva una seccion por navegador para
+ejecutar toda la tanda de casos antes de pasar al siguiente. Un
+`IMethodInterceptor` consulta la hoja `execution` antes de `@BeforeMethod`, por
+lo que las combinaciones desactivadas no abren WebDriver. Las hojas de datos
+contienen inputs funcionales y valores esperados; las aserciones TestNG siguen
+determinando el resultado. Los secretos no se trasladan al Excel.
 
 ## Fase 10 Configuracion local y Jira
 

@@ -1,6 +1,10 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 <suite name="Regresion automatizada OrangeHRM" parallel="none">
 
+    <listeners>
+        <listener class-name="page_utils.ExecutionFilter"/>
+    </listeners>
+
     <test name="Regresion Chrome" preserve-order="true">
         <parameter name="browser" value="chrome"/>
         <groups>

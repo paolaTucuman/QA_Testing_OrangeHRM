@@ -13,12 +13,12 @@ import page_objects.LoginPage;
 import page_utils.ConfigReader;
 import page_utils.EvidenceReporter;
 import page_utils.ExcelReader;
+import page_utils.ExecutionControl;
 import page_utils.ScreenshotHelper;
 
 public class LoginTest extends BaseTest {
 
     private static final String EXCEL_PATH = ConfigReader.get("excel.path");
-    private static final String SHEET_NAME = ConfigReader.get("excel.sheet.name");
 
     @DataProvider(name = "datosTC01")
     public Object[][] obtenerDatosTC01() {
@@ -104,7 +104,9 @@ public class LoginTest extends BaseTest {
     }
 
     private Object[][] datosDelCaso(String caseId) {
-        List<Map<String, String>> filas = ExcelReader.leerDatos(EXCEL_PATH, SHEET_NAME);
+        String sheetName = ExecutionControl.getDataSheet(caseId);
+        List<Map<String, String>> filas = ExcelReader.leerDatos(EXCEL_PATH, sheetName);
+        validarColumnas(filas, sheetName);
 
         Map<String, String> caso = filas.stream()
                 .filter(fila -> caseId.equalsIgnoreCase(fila.get("caseId")))
@@ -113,6 +115,16 @@ public class LoginTest extends BaseTest {
                         "No se encontraron datos para " + caseId + " en " + EXCEL_PATH));
 
         return new Object[][] {{caso}};
+    }
+
+    private void validarColumnas(List<Map<String, String>> filas, String sheetName) {
+        List<String> requeridas = List.of(
+                "caseId", "username", "password", "expectedResult", "expectedMessage"
+        );
+        if (filas.isEmpty() || !filas.get(0).keySet().containsAll(requeridas)) {
+            throw new IllegalStateException(
+                    "La hoja " + sheetName + " debe contener las columnas: " + requeridas);
+        }
     }
 
     private void validarResultadoConfigurado(Map<String, String> datos, String esperado) {

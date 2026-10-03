@@ -6,6 +6,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,24 +19,37 @@ public class ExcelReader {
      */
     public static List<Map<String, String>> leerDatos(String filePath, String sheetName) {
         List<Map<String, String>> datos = new ArrayList<>();
+        DataFormatter formatter = new DataFormatter();
 
         try (FileInputStream fis = new FileInputStream(filePath);
              Workbook workbook = new XSSFWorkbook(fis)) {
 
             Sheet sheet = workbook.getSheet(sheetName);
             if (sheet == null) {
-                System.out.println("No se encontró la hoja: " + sheetName);
-                return datos;
+                throw new IllegalStateException("No se encontro la hoja: " + sheetName);
             }
 
             Row headerRow = sheet.getRow(0);
+            if (headerRow == null) {
+                throw new IllegalStateException("La hoja " + sheetName + " no tiene encabezados");
+            }
             int totalColumns = headerRow.getLastCellNum();
 
             // Obtener los nombres de las columnas
             List<String> columnas = new ArrayList<>();
+            HashSet<String> columnasUnicas = new HashSet<>();
             for (int j = 0; j < totalColumns; j++) {
                 Cell cell = headerRow.getCell(j);
-                columnas.add(cell != null ? cell.getStringCellValue() : "columna_" + j);
+                String columna = cell == null ? "" : formatter.formatCellValue(cell).trim();
+                if (columna.isBlank()) {
+                    throw new IllegalStateException(
+                            "La hoja " + sheetName + " tiene un encabezado vacio en la columna " + (j + 1));
+                }
+                if (!columnasUnicas.add(columna)) {
+                    throw new IllegalStateException(
+                            "La hoja " + sheetName + " tiene el encabezado duplicado: " + columna);
+                }
+                columnas.add(columna);
             }
 
             System.out.println("Columnas encontradas: " + columnas);
@@ -50,23 +64,7 @@ public class ExcelReader {
 
                 for (int j = 0; j < totalColumns; j++) {
                     Cell cell = row.getCell(j);
-                    String valor = "";
-
-                    if (cell != null) {
-                        switch (cell.getCellType()) {
-                            case STRING:
-                                valor = cell.getStringCellValue();
-                                break;
-                            case NUMERIC:
-                                valor = String.valueOf((int) cell.getNumericCellValue());
-                                break;
-                            case BOOLEAN:
-                                valor = String.valueOf(cell.getBooleanCellValue());
-                                break;
-                            default:
-                                valor = "";
-                        }
-                    }
+                    String valor = cell == null ? "" : formatter.formatCellValue(cell).trim();
 
                     if (!valor.isEmpty()) filaVacia = false;
                     filaData.put(columnas.get(j), valor);
@@ -80,8 +78,8 @@ public class ExcelReader {
             System.out.println("Total de filas leídas: " + datos.size());
 
         } catch (IOException e) {
-            System.out.println("Error al leer el Excel: " + e.getMessage());
-            e.printStackTrace();
+            throw new IllegalStateException(
+                    "No se pudo leer el Excel " + filePath + ": " + e.getMessage(), e);
         }
 
         return datos;
