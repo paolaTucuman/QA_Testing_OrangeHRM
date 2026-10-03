@@ -20,6 +20,7 @@ import page_utils.ScreenshotHelper;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.util.Arrays;
 
 public class BaseTest {
 
@@ -86,20 +87,26 @@ public class BaseTest {
                 );
 
                 try {
-                    String titulo = "[AUTO] Bug en: " + result.getName();
-                    String descripcion = "La prueba automatica " + result.getName() + " fallo.\n\n" +
-                            "Razon: " + failureReason + "\n\n" +
-                            "Navegador: " + currentBrowser + "\n" +
-                            "URL: " + ConfigReader.get("base.url") + "\n" +
-                            "Fecha: " + new java.util.Date();
+                    if (JiraReporter.isAutomaticCreationEnabled()
+                            && hasGroup(result, "jira-candidate")) {
+                        String titulo = "[AUTO] Bug en: " + result.getName();
+                        String descripcion = "La prueba automatica " + result.getName() + " fallo.\n\n" +
+                                "Razon: " + failureReason + "\n\n" +
+                                "Navegador: " + currentBrowser + "\n" +
+                                "URL: " + ConfigReader.get("base.url") + "\n" +
+                                "Fecha: " + new java.util.Date();
 
-                    String issueKey = JiraReporter.crearBug(titulo, descripcion);
+                        String issueKey = JiraReporter.crearBug(titulo, descripcion);
 
-                    if (issueKey != null && screenshotPath != null) {
-                        JiraReporter.adjuntarCaptura(issueKey, screenshotPath);
-                        JiraReporter.agregarComentario(issueKey,
-                                "Reportado automaticamente por Selenium + TestNG");
-                        System.out.println("Bug reportado en JIRA: " + issueKey);
+                        if (issueKey != null && screenshotPath != null) {
+                            JiraReporter.adjuntarCaptura(issueKey, screenshotPath);
+                            JiraReporter.agregarComentario(issueKey,
+                                    "Reportado automaticamente por Selenium + TestNG");
+                            System.out.println("Bug reportado en JIRA: " + issueKey);
+                        }
+                    } else {
+                        System.out.println(
+                                "Reporte automatico a JIRA omitido: el caso no esta habilitado como candidato");
                     }
                 } catch (Exception e) {
                     System.out.println("No se pudo reportar a JIRA: " + e.getMessage());
@@ -121,6 +128,10 @@ public class BaseTest {
         return throwable == null || throwable.getMessage() == null
                 ? "Fallo sin mensaje disponible"
                 : throwable.getMessage();
+    }
+
+    private boolean hasGroup(ITestResult result, String group) {
+        return Arrays.asList(result.getMethod().getGroups()).contains(group);
     }
 
     private void closeDriver() {

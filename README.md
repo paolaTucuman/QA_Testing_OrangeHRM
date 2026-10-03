@@ -17,7 +17,7 @@ Actualmente el proyecto incluye:
 - TC08: validacion de First Name obligatorio.
 - Datos funcionales y matriz de ejecucion dirigidos desde `TestData.xlsx`.
 - Evidencias de exito y capturas automaticas ante fallos.
-- Regresion secuencial en Chrome, Firefox y Edge.
+- Regresion controlada por caso y navegador desde Excel; actualmente solo Chrome.
 - Integracion opcional con Jira, desactivada por defecto.
 
 El avance y las siguientes fases se encuentran en `PLAN_AUTOMATIZACION.md`.
@@ -44,6 +44,23 @@ Copy-Item config.example.properties src/test/resources/config.properties
 
 `config.properties` esta excluido mediante `.gitignore` y no debe incorporarse al repositorio.
 
+La configuracion sigue esta prioridad: propiedad Java (`-Dclave=valor`), variable
+de entorno, archivo local y valor por defecto. Los nombres de entorno se obtienen
+reemplazando puntos por guiones bajos y usando mayusculas. Por ejemplo:
+
+```text
+ADMIN_USERNAME
+ADMIN_PASSWORD
+JIRA_URL
+JIRA_EMAIL
+JIRA_API_TOKEN
+JIRA_PROJECT_KEY
+```
+
+`jira.enabled` permite usar la integracion. `jira.auto.create` autoriza la
+creacion automatica y solo se aplica a pruebas etiquetadas `jira-candidate`.
+Ambas propiedades permanecen en `false` por defecto.
+
 ## Ejecucion
 
 Desde la raiz del proyecto:
@@ -54,10 +71,11 @@ mvn clean test
 
 Maven ejecuta la suite definida en `testing.xml`. Los reportes, capturas y archivos generados se guardan en directorios ignorados por Git, como `target/` y `test-output/`.
 
-La suite recorre Chrome, Firefox y Edge, en ese orden y sin paralelismo. Antes de
+La suite contempla Chrome, Firefox y Edge, en ese orden y sin paralelismo. Antes de
 abrir un navegador, `ExecutionFilter` consulta la hoja `execution` y conserva
-solo las combinaciones caso/navegador marcadas con `TRUE`. Con la configuracion
-inicial se esperan 15 ejecuciones: 5 casos x 3 navegadores.
+solo las combinaciones caso/navegador marcadas con `TRUE`. La configuracion
+actual activa solo Chrome, por lo que se esperan 5 ejecuciones. Los otros
+navegadores pueden reactivarse desde Excel sin modificar codigo.
 
 Desde Eclipse tambien se puede ejecutar haciendo clic derecho en `testing.xml` y
 seleccionando `Run As > TestNG Suite`. Para validar la regresion completa no se
@@ -106,6 +124,8 @@ entorno.
 - No confirmar `src/test/resources/config.properties`.
 - No imprimir contraseñas ni tokens en la consola.
 - No habilitar Jira durante pruebas locales salvo que se quiera crear una incidencia real.
+- No activar `jira.auto.create` durante la regresion general.
+- Reservar el grupo `jira-candidate` para defectos funcionales que deban evaluarse.
 - Revisar `git status` y el contenido preparado antes de cada commit.
 
 ## Estructura principal

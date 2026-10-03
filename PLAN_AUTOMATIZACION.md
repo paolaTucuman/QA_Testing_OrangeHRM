@@ -1,11 +1,13 @@
 # Plan de mejora de las automatizaciones
 
-El objetivo es alinear el proyecto con los casos automatizados TC01, TC02, TC06, TC07 y TC08 documentados para OrangeHRM. Cada fase debe revisarse y aprobarse antes de comenzar la siguiente.
+El objetivo es alinear el proyecto con los casos automatizados TC01, TC02, TC06,
+TC07, TC08 y TC11 documentados para OrangeHRM. Cada fase debe revisarse y
+aprobarse antes de comenzar la siguiente.
 
 ## Alcance del plan
 
-Este plan cubre exclusivamente la automatizacion de TC01, TC02, TC06, TC07 y TC08.
-Los casos manuales TC03, TC04, TC05, TC09, TC10 y TC11, asi como la actualizacion
+Este plan cubre exclusivamente la automatizacion de TC01, TC02, TC06, TC07, TC08
+y TC11. Los casos manuales TC03, TC04, TC05, TC09 y TC10, asi como la actualizacion
 del informe, la matriz de trazabilidad y las metricas, quedan fuera del trabajo de
 codigo y seran realizados por la autora del proyecto.
 
@@ -119,8 +121,8 @@ en Chrome, Firefox y Edge.
 
 ## Fase 9 Control de ejecucion y datos desde Excel
 
-Estado: implementada el 2026-10-02 y pendiente de validar mediante la regresion
-controlada en Eclipse.
+Estado: implementada y validada el 2026-10-02 mediante la regresion controlada
+en Eclipse: 5 pruebas aprobadas, 0 fallidas y 0 omitidas en Chrome.
 
 - Agregar las hojas `execution` y `employee` a `TestData.xlsx`.
 - Mantener `login` para los datos de TC01 y TC02.
@@ -137,12 +139,42 @@ determinando el resultado. Los secretos no se trasladan al Excel.
 
 ## Fase 10 Configuracion local y Jira
 
-Estado: pendiente.
+Estado: implementada y validada el 2026-10-02. La regresion obtuvo 5 pruebas
+aprobadas, 0 fallidas y 0 omitidas en Chrome; TC08 confirmo evidencia visual
+`LISTA` despues del ajuste de estabilidad.
 
 - Organizar URL, credenciales OrangeHRM y Jira en `config.properties`.
 - Mantener secretos fuera del Excel y del repositorio.
 - Actualizar `config.example.properties` con placeholders seguros.
 - Documentar que variables de entorno o GitHub Secrets seran la opcion para CI.
+
+Decision de implementacion: las propiedades Java y variables de entorno tienen
+prioridad sobre el archivo local. Jira utiliza dos controles independientes:
+`jira.enabled` habilita la integracion y `jira.auto.create` autoriza la creacion
+automatica. La regresion general no genera incidencias; solo una prueba marcada
+como `jira-candidate` podra hacerlo cuando ambos controles esten activos. El tipo
+de incidencia predeterminado es `Bug`.
+
+## Fase 11 Logout y sesion cerrada TC11
+
+Estado: pendiente de iniciar despues del commit y push de la fase 10.
+
+- Agregar localizadores del menu de usuario y Logout.
+- Iniciar sesion y acceder a una pagina protegida.
+- Cerrar sesion y validar que Login vuelva a mostrarse.
+- Navegar hacia atras y comprobar que no exista acceso funcional autenticado.
+- Registrar comparaciones Esperado/Actual y dos evidencias visuales.
+- Marcar TC11 como unico candidato a reporte automatico en Jira.
+- Ejecutar inicialmente en Chrome desde la matriz de Excel.
+
+## Fase 12 Regresion final y cierre de automatizacion
+
+Estado: pendiente.
+
+- Ejecutar TC01, TC02, TC06, TC07, TC08 y TC11 en Chrome.
+- Confirmar 6 pruebas aprobadas, 0 fallidas y 0 omitidas cuando no existan defectos.
+- Analizar cualquier fallo antes de crear una incidencia.
+- Mantener TC03, TC04, TC05, TC09 y TC10 como pruebas manuales.
 
 ## Regla de revisión
 

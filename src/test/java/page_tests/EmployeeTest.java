@@ -116,11 +116,12 @@ public class EmployeeTest extends BaseTest {
                 "TC07: OrangeHRM no genero un Employee ID para la busqueda");
 
         String resultText = employeePage.searchEmployeeById(employeeId);
+        String resultSummary = employeePage.getSearchResultSummary();
 
         boolean exactEmployeeIdFound = containsExactLine(resultText, employeeId);
         boolean firstNameFound = resultText.contains(firstName);
         boolean lastNameFound = resultText.contains(lastName);
-        boolean expectedMessageFound = resultText.contains(datos.get("expectedMessage"));
+        boolean expectedMessageFound = resultSummary.equals(datos.get("expectedMessage"));
 
         EvidenceReporter.recordComparison("TC07", getCurrentBrowser(),
                 "Employee ID exacto en resultado", true, exactEmployeeIdFound);
@@ -130,7 +131,7 @@ public class EmployeeTest extends BaseTest {
                 "Last Name en resultado", true, lastNameFound);
         EvidenceReporter.recordComparison("TC07", getCurrentBrowser(),
                 "Resumen de resultados", datos.get("expectedMessage"),
-                expectedMessageFound ? datos.get("expectedMessage") : resultText);
+                resultSummary);
 
         Assert.assertTrue(exactEmployeeIdFound,
                 "TC07: la fila encontrada no contiene el Employee ID exacto");

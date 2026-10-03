@@ -10,28 +10,37 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 public class JiraReporter {
 
-    private static final String JIRA_URL = ConfigReader.get("jira.url");
-    private static final String EMAIL = ConfigReader.get("jira.email");
-    private static final String API_TOKEN = ConfigReader.get("jira.api.token");
-    private static final String PROJECT_KEY = ConfigReader.get("jira.project.key");
-    private static final String ISSUE_TYPE = ConfigReader.get("jira.issue.type", "Task");
+    private static final String JIRA_URL = ConfigReader.get("jira.url", "");
+    private static final String EMAIL = ConfigReader.get("jira.email", "");
+    private static final String API_TOKEN = ConfigReader.get("jira.api.token", "");
+    private static final String PROJECT_KEY = ConfigReader.get("jira.project.key", "");
+    private static final String ISSUE_TYPE = ConfigReader.get("jira.issue.type", "Bug");
     private static final boolean JIRA_ENABLED = ConfigReader.getBoolean("jira.enabled");
+    private static final boolean AUTO_CREATE_ENABLED =
+            ConfigReader.getBoolean("jira.auto.create");
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    public static boolean isAutomaticCreationEnabled() {
+        return JIRA_ENABLED && AUTO_CREATE_ENABLED;
+    }
+
     public static String crearBug(String titulo, String descripcion) {
         if (!JIRA_ENABLED) {
-            System.out.println("JIRA deshabilitado en config.properties");
+            System.out.println("JIRA deshabilitado por configuracion");
             return null;
         }
 
         try {
+            validateConfiguration();
             String auth = EMAIL + ":" + API_TOKEN;
-            String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+            String encodedAuth = Base64.getEncoder().encodeToString(
+                    auth.getBytes(StandardCharsets.UTF_8));
 
             ObjectNode root = mapper.createObjectNode();
             ObjectNode fields = root.putObject("fields");
@@ -72,7 +81,6 @@ public class JiraReporter {
                 return issueKey;
             } else {
                 System.out.println("Error al crear bug: " + response.statusCode());
-                System.out.println("Respuesta: " + response.body());
             }
 
         } catch (Exception e) {
@@ -85,6 +93,7 @@ public class JiraReporter {
         if (!JIRA_ENABLED || issueKey == null) return;
 
         try {
+            validateConfiguration();
             File file = new File(screenshotPath);
             if (!file.exists()) {
                 System.out.println("No se encontro el archivo: " + screenshotPath);
@@ -92,7 +101,8 @@ public class JiraReporter {
             }
 
             String auth = EMAIL + ":" + API_TOKEN;
-            String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+            String encodedAuth = Base64.getEncoder().encodeToString(
+                    auth.getBytes(StandardCharsets.UTF_8));
 
             String boundary = "----JiraBoundary" + System.currentTimeMillis();
 
@@ -128,8 +138,10 @@ public class JiraReporter {
         if (!JIRA_ENABLED || issueKey == null) return;
 
         try {
+            validateConfiguration();
             String auth = EMAIL + ":" + API_TOKEN;
-            String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+            String encodedAuth = Base64.getEncoder().encodeToString(
+                    auth.getBytes(StandardCharsets.UTF_8));
 
             ObjectNode root = mapper.createObjectNode();
             ObjectNode body = root.putObject("body");
@@ -160,6 +172,20 @@ public class JiraReporter {
 
         } catch (Exception e) {
             System.out.println("Error al agregar comentario: " + e.getMessage());
+        }
+    }
+
+    private static void validateConfiguration() {
+        requireValue("jira.url", JIRA_URL);
+        requireValue("jira.email", EMAIL);
+        requireValue("jira.api.token", API_TOKEN);
+        requireValue("jira.project.key", PROJECT_KEY);
+        requireValue("jira.issue.type", ISSUE_TYPE);
+    }
+
+    private static void requireValue(String key, String value) {
+        if (value == null || value.isBlank() || value.startsWith("REEMPLAZAR")) {
+            throw new IllegalStateException("Falta configurar " + key);
         }
     }
 }

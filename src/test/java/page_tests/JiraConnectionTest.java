@@ -1,5 +1,6 @@
 package page_tests;
 
+import page_utils.ConfigReader;
 import page_utils.JiraReporter;
 import org.testng.annotations.Test;
 
@@ -8,7 +9,8 @@ public class JiraConnectionTest {
     @Test
     public void testConexionJira() {
         System.out.println("Probando conexión con JIRA...");
-        System.out.println("Project Key: KAN");
+        System.out.println("Project Key: "
+                + ConfigReader.get("jira.project.key", "NO_CONFIGURADO"));
 
         String issueKey = JiraReporter.crearBug(
             "[AUTO] Prueba de conexión desde Selenium",

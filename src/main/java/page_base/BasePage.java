@@ -3,7 +3,6 @@ package page_base;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.ScriptTimeoutException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -76,17 +75,8 @@ public abstract class BasePage {
                     .stream()
                     .noneMatch(this::isDisplayedSafely));
 
-            driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(5));
-            ((JavascriptExecutor) driver).executeAsyncScript(
-                    "const done = arguments[arguments.length - 1];" +
-                    "const afterFonts = () => requestAnimationFrame(() => " +
-                    "requestAnimationFrame(done));" +
-                    "if (document.fonts && document.fonts.ready) {" +
-                    "document.fonts.ready.then(afterFonts, afterFonts);" +
-                    "} else { afterFonts(); }"
-            );
             return true;
-        } catch (TimeoutException | ScriptTimeoutException e) {
+        } catch (TimeoutException e) {
             System.out.println(
                     "Advertencia: no se confirmo la estabilidad visual de la evidencia: " +
                     e.getMessage()

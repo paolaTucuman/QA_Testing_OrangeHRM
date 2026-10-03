@@ -21,6 +21,10 @@ public final class EmployeeLocators {
     public static final By SEARCH_BUTTON = By.xpath(
             "//button[@type='submit' and normalize-space()='Search']"
     );
+    public static final By SEARCH_RESULT_SUMMARY = By.xpath(
+            "//div[contains(@class,'orangehrm-horizontal-padding')]" +
+            "//span[contains(normalize-space(),'Record Found')]"
+    );
     public static final By PERSONAL_DETAILS_TITLE = By.xpath(
             "//h6[normalize-space()='Personal Details']"
     );

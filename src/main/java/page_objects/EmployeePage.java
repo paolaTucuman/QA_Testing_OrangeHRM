@@ -79,6 +79,10 @@ public class EmployeePage extends BasePage {
         return resultRow.getText();
     }
 
+    public String getSearchResultSummary() {
+        return waitUntilVisible(EmployeeLocators.SEARCH_RESULT_SUMMARY).getText().trim();
+    }
+
     public void attemptAddEmployeeWithoutFirstName(String lastName) {
         goToPIM();
         clickAddEmployee();
