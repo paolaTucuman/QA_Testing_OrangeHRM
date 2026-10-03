@@ -157,9 +157,10 @@ de incidencia predeterminado es `Bug`.
 
 ## Fase 11 Logout y sesion cerrada TC11
 
-Estado: ajustada para validacion. La primera ejecucion confirmo que Logout mostro
-Login y que la URL protegida no recupero acceso funcional. Falta ejecutar el
-alcance ampliado que comprueba tambien la exposicion visual por cache o historial.
+Estado: completada y validada el 2026-10-03 en Chrome y Firefox. Logout mostro
+Login correctamente, pero Back recupero visualmente el modulo PIM desde el
+historial o la cache. El defecto fue reproducido en ambos navegadores y reportado
+automaticamente en Jira como KAN-4, con descripcion, captura y comentario.
 
 - Agregar localizadores del menu de usuario y Logout.
 - Iniciar sesion y acceder a una pagina protegida.
@@ -175,16 +176,32 @@ Decision de implementacion: TC11 separa dos riesgos. La captura
 `TC11_Logout_Back` se toma inmediatamente despues de Back para detectar una
 debilidad de cache aunque la pagina no permita operar. Luego se solicita la URL
 protegida para validar la invalidacion funcional de la sesion. El caso falla si
-se expone PIM en el historial o si se recupera acceso sin credenciales.
+se expone PIM en el historial o si se recupera acceso sin credenciales. El
+proyecto Jira KAN no admite el tipo tecnico Bug, por lo que KAN-4 fue creado como
+Task y documentado expresamente como defecto de seguridad. Tras validar la
+integracion, `jira.auto.create` volvio a quedar desactivado para evitar duplicados.
 
 ## Fase 12 Regresion final y cierre de automatizacion
 
-Estado: pendiente.
+Estado: completada el 2026-10-03. La regresion final en Chrome
+ejecuto 6 pruebas: 5 aprobadas, 1 fallida y 0 omitidas. La unica falla corresponde
+al defecto funcional reproducible de TC11, registrado como KAN-4; no representa
+un fallo del framework de automatizacion.
 
 - Ejecutar TC01, TC02, TC06, TC07, TC08 y TC11 en Chrome.
-- Confirmar 6 pruebas aprobadas, 0 fallidas y 0 omitidas cuando no existan defectos.
+- Confirmar TC01, TC02, TC06, TC07 y TC08 como aprobadas.
+- Mantener TC11 fallida mientras OrangeHRM exponga PIM mediante Back despues del
+  logout y relacionar el resultado con KAN-4.
 - Analizar cualquier fallo antes de crear una incidencia.
+- Mantener desactivada la creacion automatica de Jira despues del reporte
+  controlado.
 - Mantener TC03, TC04, TC05, TC09 y TC10 como pruebas manuales.
+
+Decision de cierre: una regresion no necesita finalizar con todas las pruebas
+aprobadas para validar el framework. En este caso, cinco escenarios finalizaron
+correctamente y TC11 detecto de forma consistente el comportamiento para el que
+fue disenada. Las comparaciones Esperado/Actual, las capturas y KAN-4 proporcionan
+la trazabilidad del resultado.
 
 ## Regla de revisión
 

@@ -15,7 +15,8 @@ Actualmente el proyecto incluye:
 - TC06: registro de un empleado con datos validos.
 - TC07: busqueda por ID de un empleado creado por la propia prueba.
 - TC08: validacion de First Name obligatorio.
-- TC11: logout y verificacion de que Back no recupere acceso funcional.
+- TC11: logout, exposicion visual de contenido protegido mediante Back y
+  verificacion de que una URL protegida vuelva a exigir autenticacion.
 - Datos funcionales y matriz de ejecucion dirigidos desde `TestData.xlsx`.
 - Evidencias de exito y capturas automaticas ante fallos.
 - Regresion controlada por caso y navegador desde Excel; actualmente solo Chrome.
