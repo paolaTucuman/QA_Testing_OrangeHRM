@@ -32,6 +32,12 @@ public class LoginPage extends BasePage {
                 && isDisplayed(LoginLocators.LOGIN_BUTTON);
     }
 
+    public boolean isLoginFormDisplayedNow() {
+        return isDisplayedNow(LoginLocators.USERNAME)
+                && isDisplayedNow(LoginLocators.PASSWORD)
+                && isDisplayedNow(LoginLocators.LOGIN_BUTTON);
+    }
+
     public boolean isLoginFormHidden() {
         return isInvisible(LoginLocators.USERNAME);
     }
@@ -41,6 +47,13 @@ public class LoginPage extends BasePage {
             String message = waitUntilVisible(LoginLocators.ERROR_MESSAGE).getText();
             return message == null || message.isBlank() ? null : message.trim();
         });
+        waitUntilVisible(LoginLocators.USERNAME);
+        waitUntilVisible(LoginLocators.PASSWORD);
+        waitUntilVisible(LoginLocators.LOGIN_BUTTON);
+        return waitUntilVisualStateIsReady();
+    }
+
+    public boolean prepareLoginEvidence() {
         waitUntilVisible(LoginLocators.USERNAME);
         waitUntilVisible(LoginLocators.PASSWORD);
         waitUntilVisible(LoginLocators.LOGIN_BUTTON);

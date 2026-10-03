@@ -15,6 +15,7 @@
         <classes>
             <class name="page_tests.LoginTest"/>
             <class name="page_tests.EmployeeTest"/>
+            <class name="page_tests.SessionTest"/>
         </classes>
     </test>
 
@@ -28,6 +29,7 @@
         <classes>
             <class name="page_tests.LoginTest"/>
             <class name="page_tests.EmployeeTest"/>
+            <class name="page_tests.SessionTest"/>
         </classes>
     </test>
 
@@ -41,6 +43,7 @@
         <classes>
             <class name="page_tests.LoginTest"/>
             <class name="page_tests.EmployeeTest"/>
+            <class name="page_tests.SessionTest"/>
         </classes>
     </test>
 

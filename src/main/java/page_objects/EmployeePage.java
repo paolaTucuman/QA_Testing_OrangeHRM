@@ -14,6 +14,8 @@ public class EmployeePage extends BasePage {
 
     public void goToPIM() {
         waitUntilClickable(CommonLocators.PIM_MENU).click();
+        waitUntilClickable(EmployeeLocators.SEARCH_BUTTON);
+        waitUntilInvisible(CommonLocators.LOADING_SPINNER);
     }
 
     public void clickAddEmployee() {

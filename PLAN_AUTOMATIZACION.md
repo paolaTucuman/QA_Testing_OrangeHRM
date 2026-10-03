@@ -157,7 +157,9 @@ de incidencia predeterminado es `Bug`.
 
 ## Fase 11 Logout y sesion cerrada TC11
 
-Estado: pendiente de iniciar despues del commit y push de la fase 10.
+Estado: implementada y validada funcional y visualmente en Chrome el 2026-10-02:
+1 prueba aprobada, 0 fallidas y 0 omitidas. Logout mostro Login y la navegacion
+hacia atras no recupero acceso funcional a PIM.
 
 - Agregar localizadores del menu de usuario y Logout.
 - Iniciar sesion y acceder a una pagina protegida.

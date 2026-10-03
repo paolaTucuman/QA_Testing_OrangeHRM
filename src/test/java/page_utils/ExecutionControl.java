@@ -13,7 +13,7 @@ public final class ExecutionControl {
             "caseId", "enabled", "chrome", "firefox", "edge", "dataSheet"
     );
     private static final Set<String> SUPPORTED_CASES = Set.of(
-            "TC01", "TC02", "TC06", "TC07", "TC08"
+            "TC01", "TC02", "TC06", "TC07", "TC08", "TC11"
     );
     private static final Set<String> SUPPORTED_BROWSERS = Set.of(
             "chrome", "firefox", "edge"

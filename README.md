@@ -15,6 +15,7 @@ Actualmente el proyecto incluye:
 - TC06: registro de un empleado con datos validos.
 - TC07: busqueda por ID de un empleado creado por la propia prueba.
 - TC08: validacion de First Name obligatorio.
+- TC11: logout y verificacion de que Back no recupere acceso funcional.
 - Datos funcionales y matriz de ejecucion dirigidos desde `TestData.xlsx`.
 - Evidencias de exito y capturas automaticas ante fallos.
 - Regresion controlada por caso y navegador desde Excel; actualmente solo Chrome.
@@ -74,7 +75,7 @@ Maven ejecuta la suite definida en `testing.xml`. Los reportes, capturas y archi
 La suite contempla Chrome, Firefox y Edge, en ese orden y sin paralelismo. Antes de
 abrir un navegador, `ExecutionFilter` consulta la hoja `execution` y conserva
 solo las combinaciones caso/navegador marcadas con `TRUE`. La configuracion
-actual activa solo Chrome, por lo que se esperan 5 ejecuciones. Los otros
+actual activa solo Chrome, por lo que se esperan 6 ejecuciones. Los otros
 navegadores pueden reactivarse desde Excel sin modificar codigo.
 
 Desde Eclipse tambien se puede ejecutar haciendo clic derecho en `testing.xml` y
@@ -107,6 +108,7 @@ la interfaz queda estable se registra como `LISTA`.
 - `login`: credenciales de demostracion y resultados esperados de TC01 y TC02.
 - `employee`: datos no sensibles, modos de generacion y resultados esperados de
   TC06, TC07 y TC08.
+- `session`: seccion protegida y resultados esperados de TC11.
 
 Solo deben utilizarse `TRUE` o `FALSE` en las columnas de control. Los IDs de
 caso y los encabezados no deben renombrarse, porque se validan antes de ejecutar.

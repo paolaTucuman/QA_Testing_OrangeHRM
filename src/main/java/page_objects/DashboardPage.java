@@ -4,6 +4,7 @@ import org.openqa.selenium.WebDriver;
 import page_base.BasePage;
 import page_locators.CommonLocators;
 import page_locators.DashboardLocators;
+import page_locators.LoginLocators;
 
 public class DashboardPage extends BasePage {
 
@@ -21,6 +22,22 @@ public class DashboardPage extends BasePage {
 
     public boolean isDashboardDisplayedNow() {
         return isDisplayedNow(DashboardLocators.DASHBOARD_TITLE);
+    }
+
+    public void logout() {
+        waitUntilClickable(CommonLocators.USER_DROPDOWN).click();
+        waitUntilClickable(CommonLocators.LOGOUT_LINK).click();
+        waitUntilVisible(LoginLocators.USERNAME);
+    }
+
+    public boolean isAuthenticatedNavigationDisplayedNow() {
+        return isDisplayedNow(CommonLocators.PIM_MENU);
+    }
+
+    public boolean waitForSessionOrLoginState() {
+        wait.until(currentDriver -> isDisplayedNow(LoginLocators.USERNAME)
+                || isDisplayedNow(CommonLocators.PIM_MENU));
+        return waitUntilVisualStateIsReady();
     }
 
     public boolean prepareDashboardEvidence() {
