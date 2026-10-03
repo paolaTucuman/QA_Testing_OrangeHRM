@@ -36,10 +36,13 @@ public class ExecutionFilter implements IMethodInterceptor {
         String caseId = "TC" + matcher.group(1);
         boolean run = ExecutionControl.shouldRun(caseId, browser);
         System.out.printf(
-                "CONTROL | Caso: %s | Navegador: %s | Ejecutar: %s | Hoja: %s%n",
+                "CONTROL | Caso: %s | Suite: %s/%s | Navegador: %s | Ejecutar: %s | JIRA: %s | Hoja: %s%n",
                 caseId,
+                ExecutionControl.getSuite(caseId),
+                ExecutionControl.getSelectedSuite(),
                 browser.toLowerCase(Locale.ROOT),
                 run,
+                ExecutionControl.shouldReportToJira(caseId),
                 ExecutionControl.getDataSheet(caseId)
         );
         return run;

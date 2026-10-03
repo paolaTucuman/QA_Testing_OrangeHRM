@@ -9,20 +9,28 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestResult;
+import org.testng.Reporter;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import page_locators.LoginLocators;
 import page_utils.ConfigReader;
+import page_utils.ExecutionControl;
 import page_utils.JiraReporter;
 import page_utils.ScreenshotHelper;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BaseTest {
+
+    private static final String FAILURE_SCREENSHOT_ATTRIBUTE = "failureScreenshotPath";
+    private static final Pattern CASE_ID_PATTERN = Pattern.compile(
+            "^tc(\\d{2})", Pattern.CASE_INSENSITIVE);
 
     protected WebDriver driver;
     private String currentBrowser;
@@ -81,28 +89,46 @@ public class BaseTest {
                 System.out.println("Prueba fallida: " + result.getName());
                 System.out.println("Razon: " + failureReason);
 
-                String screenshotPath = ScreenshotHelper.takeScreenshot(
-                        driver,
-                        result.getName() + "_" + currentBrowser
-                );
+                String screenshotPath = getRegisteredFailureScreenshot(result);
+                if (screenshotPath == null) {
+                    screenshotPath = ScreenshotHelper.takeScreenshot(
+                            driver,
+                            result.getName() + "_" + currentBrowser
+                    );
+                } else {
+                    System.out.println(
+                            "Reutilizando captura de evidencia del escenario: " + screenshotPath);
+                }
 
                 try {
-                    if (JiraReporter.isAutomaticCreationEnabled()
-                            && hasGroup(result, "jira-candidate")) {
+                    String caseId = getCaseId(result);
+                    boolean jiraEnabledForCase = ExecutionControl.shouldReportToJira(caseId);
+
+                    if (JiraReporter.isAutomaticCreationEnabled() && jiraEnabledForCase) {
                         String titulo = buildJiraTitle(result);
                         String descripcion = buildJiraDescription(result, failureReason);
 
-                        String issueKey = JiraReporter.crearBug(titulo, descripcion);
+                        String issueKey = JiraReporter.crearOReutilizarIncidencia(
+                                caseId, titulo, descripcion);
 
-                        if (issueKey != null && screenshotPath != null) {
-                            JiraReporter.adjuntarCaptura(issueKey, screenshotPath);
-                            JiraReporter.agregarComentario(issueKey,
-                                    "Reportado automaticamente por Selenium + TestNG");
-                            System.out.println("Bug reportado en JIRA: " + issueKey);
+                        if (issueKey != null) {
+                            boolean commentAdded = JiraReporter.agregarComentario(issueKey,
+                                    buildJiraExecutionComment(caseId, failureReason));
+                            boolean screenshotAttached = screenshotPath != null
+                                    && JiraReporter.adjuntarCaptura(issueKey, screenshotPath);
+
+                            if (commentAdded && screenshotAttached) {
+                                System.out.println(
+                                        "Incidencia actualizada completamente en JIRA: " + issueKey);
+                            } else {
+                                System.out.println(
+                                        "Incidencia localizada, pero la actualizacion quedo incompleta: "
+                                                + issueKey);
+                            }
                         }
-                    } else if (!hasGroup(result, "jira-candidate")) {
+                    } else if (!jiraEnabledForCase) {
                         System.out.println(
-                                "Reporte automatico a JIRA omitido: el caso no esta habilitado como candidato");
+                                "Reporte automatico a JIRA omitido: jiraReport=FALSE para " + caseId);
                     } else {
                         System.out.println(
                                 "Reporte automatico a JIRA omitido: la creacion automatica esta deshabilitada");
@@ -129,8 +155,32 @@ public class BaseTest {
                 : throwable.getMessage();
     }
 
-    private boolean hasGroup(ITestResult result, String group) {
-        return Arrays.asList(result.getMethod().getGroups()).contains(group);
+    protected void registerFailureScreenshot(String screenshotPath) {
+        if (screenshotPath == null || screenshotPath.isBlank()) {
+            return;
+        }
+
+        ITestResult currentResult = Reporter.getCurrentTestResult();
+        if (currentResult != null) {
+            currentResult.setAttribute(FAILURE_SCREENSHOT_ATTRIBUTE, screenshotPath);
+        }
+    }
+
+    private String getRegisteredFailureScreenshot(ITestResult result) {
+        Object screenshotPath = result.getAttribute(FAILURE_SCREENSHOT_ATTRIBUTE);
+        if (screenshotPath instanceof String && !((String) screenshotPath).isBlank()) {
+            return (String) screenshotPath;
+        }
+        return null;
+    }
+
+    private String getCaseId(ITestResult result) {
+        Matcher matcher = CASE_ID_PATTERN.matcher(result.getName());
+        if (!matcher.find()) {
+            throw new IllegalStateException(
+                    "El metodo de prueba no comienza con un caseId valido: " + result.getName());
+        }
+        return "TC" + matcher.group(1);
     }
 
     private String buildJiraTitle(ITestResult result) {
@@ -163,6 +213,26 @@ public class BaseTest {
                 "Razon: " + failureReason + "\n\n" +
                 "Navegador: " + currentBrowser + "\n" +
                 "URL: " + ConfigReader.get("base.url") + "\n" +
+                "Fecha: " + new java.util.Date();
+    }
+
+    private String buildJiraExecutionComment(String caseId, String failureReason) {
+        if ("TC11".equals(caseId)) {
+            return "Ejecucion automatica de TC11.\n" +
+                    "Navegador: " + currentBrowser.toLowerCase(Locale.ROOT) + "\n" +
+                    "Resultado esperado: permanecer en Login y no mostrar contenido protegido.\n" +
+                    "Resultado actual: Back mostro PIM desde el historial o la cache.\n" +
+                    "Resultado: FALLA\n" +
+                    "Detalle: " + failureReason + "\n" +
+                    "URL observada: " + driver.getCurrentUrl() + "\n" +
+                    "Fecha: " + new java.util.Date();
+        }
+
+        return "Evidencia automatica adicional.\n" +
+                "Caso: " + caseId + "\n" +
+                "Navegador: " + currentBrowser.toLowerCase(Locale.ROOT) + "\n" +
+                "Resultado: FALLA\n" +
+                "Detalle: " + failureReason + "\n" +
                 "Fecha: " + new java.util.Date();
     }
 

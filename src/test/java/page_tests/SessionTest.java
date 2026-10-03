@@ -39,7 +39,7 @@ public class SessionTest extends BaseTest {
     }
 
     @Test(dataProvider = "datosTC11",
-            groups = {"automated", "positive", "jira-candidate"})
+            groups = {"automated", "security"})
     public void tc11LogoutYValidarSesionCerrada(Map<String, String> datos) {
         validarDatos(datos);
 
@@ -108,17 +108,20 @@ public class SessionTest extends BaseTest {
                 driver,
                 "TC11_Logout_Back_" + getCurrentBrowser()
         );
-        boolean backEvidenceReady = backStateReady
-                && loginVisibleAfterBack
-                && !protectedViewAfterBack;
+        boolean backEvidenceReady = backStateReady;
         EvidenceReporter.recordScreenshot(
                 "TC11", getCurrentBrowser(), backScreenshot, backEvidenceReady
         );
 
-        Assert.assertEquals(actualBackPage, expectedBackPage,
-                "TC11: Back mostro una pantalla distinta de la esperada");
-        Assert.assertEquals(protectedViewAfterBack, expectedProtectedViewAfterBack,
-                "TC11: Back expuso contenido protegido desde el historial o la cache");
+        try {
+            Assert.assertEquals(actualBackPage, expectedBackPage,
+                    "TC11: Back mostro una pantalla distinta de la esperada");
+            Assert.assertEquals(protectedViewAfterBack, expectedProtectedViewAfterBack,
+                    "TC11: Back expuso contenido protegido desde el historial o la cache");
+        } catch (AssertionError error) {
+            registerFailureScreenshot(backScreenshot);
+            throw error;
+        }
 
         driver.get(protectedUrl);
         dashboardPage.waitForSessionOrLoginState();

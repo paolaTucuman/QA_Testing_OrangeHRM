@@ -19,7 +19,7 @@ Actualmente el proyecto incluye:
   verificacion de que una URL protegida vuelva a exigir autenticacion.
 - Datos funcionales y matriz de ejecucion dirigidos desde `TestData.xlsx`.
 - Evidencias de exito y capturas automaticas ante fallos.
-- Regresion controlada por caso y navegador desde Excel; actualmente solo Chrome.
+- Regresion controlada por caso, suite y navegador desde Excel.
 - Integracion opcional con Jira, desactivada por defecto.
 
 El avance y las siguientes fases se encuentran en `PLAN_AUTOMATIZACION.md`.
@@ -59,9 +59,14 @@ JIRA_API_TOKEN
 JIRA_PROJECT_KEY
 ```
 
-`jira.enabled` permite usar la integracion. `jira.auto.create` autoriza la
-creacion automatica y solo se aplica a pruebas etiquetadas `jira-candidate`.
-Ambas propiedades permanecen en `false` por defecto.
+`jira.enabled` permite usar la integracion y `jira.auto.create` es el interruptor
+global para crear o actualizar incidencias. Ademas, cada caso debe tener
+`jiraReport=TRUE` en Excel. Las tres condiciones evitan reportes accidentales.
+Ambas propiedades locales permanecen en `false` por defecto.
+
+Antes de crear una incidencia, la integracion busca un ticket abierto del mismo
+`caseId`. Si existe, reutiliza el ticket y agrega la evidencia del navegador como
+adjunto y comentario. Esto evita crear un bug nuevo por cada navegador o corrida.
 
 ## Ejecucion
 
@@ -74,10 +79,13 @@ mvn clean test
 Maven ejecuta la suite definida en `testing.xml`. Los reportes, capturas y archivos generados se guardan en directorios ignorados por Git, como `target/` y `test-output/`.
 
 La suite contempla Chrome, Firefox y Edge, en ese orden y sin paralelismo. Antes de
-abrir un navegador, `ExecutionFilter` consulta la hoja `execution` y conserva
-solo las combinaciones caso/navegador marcadas con `TRUE`. La configuracion
-actual activa solo Chrome, por lo que se esperan 6 ejecuciones. Los otros
-navegadores pueden reactivarse desde Excel sin modificar codigo.
+abrir un navegador, `ExecutionFilter` consulta las hojas `settings` y `execution`.
+Solo conserva los casos habilitados que pertenecen a la suite seleccionada y cuyo
+navegador esta marcado con `TRUE`.
+
+`settings.runSuite` acepta `ALL`, `POSITIVE`, `NEGATIVE` o `SECURITY`. Con `ALL`
+se ejecutan todos los casos habilitados. El control por navegador permanece en la
+hoja `execution`, por lo que no es necesario modificar codigo ni `testing.xml`.
 
 Desde Eclipse tambien se puede ejecutar haciendo clic derecho en `testing.xml` y
 seleccionando `Run As > TestNG Suite`. Para validar la regresion completa no se
@@ -101,10 +109,13 @@ la interfaz queda estable se registra como `LISTA`.
 
 ## Datos de prueba
 
-`src/test/resources/TestData.xlsx` contiene tres hojas:
+`src/test/resources/TestData.xlsx` contiene cinco hojas:
 
+- `settings`: selecciona con `runSuite` si se ejecutan todos los casos o solamente
+  las suites positiva, negativa o de seguridad.
 - `execution`: una fila por caso. `enabled=FALSE` excluye el caso completo;
-  `chrome`, `firefox` y `edge` permiten seleccionar navegadores por separado;
+  `suite` clasifica el escenario; `jiraReport` autoriza o bloquea el reporte
+  automatico de ese caso; `chrome`, `firefox` y `edge` seleccionan navegadores;
   `dataSheet` indica de que hoja se obtienen los inputs.
 - `login`: credenciales de demostracion y resultados esperados de TC01 y TC02.
 - `employee`: datos no sensibles, modos de generacion y resultados esperados de
@@ -128,7 +139,7 @@ entorno.
 - No imprimir contraseñas ni tokens en la consola.
 - No habilitar Jira durante pruebas locales salvo que se quiera crear una incidencia real.
 - No activar `jira.auto.create` durante la regresion general.
-- Reservar el grupo `jira-candidate` para defectos funcionales que deban evaluarse.
+- Mantener `jiraReport=FALSE` salvo para casos que deban reportarse automaticamente.
 - Revisar `git status` y el contenido preparado antes de cada commit.
 
 ## Estructura principal
