@@ -43,7 +43,6 @@ public class EmployeePage extends BasePage {
         wait.until(currentDriver -> currentDriver.getCurrentUrl()
                 .contains("/pim/viewPersonalDetails/empNumber/"));
         waitUntilVisible(EmployeeLocators.FIRST_NAME);
-        waitUntilHasValue(EmployeeLocators.EMPLOYEE_ID);
         waitUntilInvisible(CommonLocators.LOADING_SPINNER);
     }
 
@@ -52,8 +51,20 @@ public class EmployeePage extends BasePage {
                 && isDisplayed(EmployeeLocators.FIRST_NAME);
     }
 
-    public String getEmployeeId() {
-        return waitUntilHasValue(EmployeeLocators.EMPLOYEE_ID);
+    public String getEmployeeId(String expectedEmployeeId) {
+        if (expectedEmployeeId == null || expectedEmployeeId.isBlank()) {
+            throw new IllegalArgumentException(
+                    "El Employee ID esperado no puede estar vacio");
+        }
+
+        return wait.until(currentDriver -> currentDriver
+                .findElements(EmployeeLocators.PERSONAL_DETAILS_INPUTS)
+                .stream()
+                .map(element -> element.getAttribute("value"))
+                .filter(value -> expectedEmployeeId.equals(
+                        value == null ? "" : value.trim()))
+                .findFirst()
+                .orElse(null));
     }
 
     public String getSavedFirstName() {
@@ -69,7 +80,7 @@ public class EmployeePage extends BasePage {
     }
 
     public boolean preparePersonalDetailsEvidence() {
-        waitUntilHasValue(EmployeeLocators.EMPLOYEE_ID);
+        waitUntilVisible(EmployeeLocators.FIRST_NAME);
         waitUntilInvisible(CommonLocators.LOADING_SPINNER);
         scrollIntoView(EmployeeLocators.FIRST_NAME);
         return waitUntilVisualStateIsReady();
@@ -81,7 +92,8 @@ public class EmployeePage extends BasePage {
         waitUntilClickable(EmployeeLocators.SEARCH_BUTTON).click();
         waitUntilInvisible(CommonLocators.LOADING_SPINNER);
 
-        WebElement resultRow = waitUntilVisible(EmployeeLocators.employeeResultRow(employeeId));
+        WebElement resultRow =
+                waitUntilVisible(EmployeeLocators.employeeResultRow(employeeId));
         scrollIntoView(EmployeeLocators.employeeResultRow(employeeId));
         return resultRow.getText();
     }
@@ -101,7 +113,9 @@ public class EmployeePage extends BasePage {
     }
 
     public String getFirstNameRequiredMessage() {
-        return waitUntilVisible(EmployeeLocators.FIRST_NAME_REQUIRED).getText().trim();
+        return waitUntilVisible(EmployeeLocators.FIRST_NAME_REQUIRED)
+                .getText()
+                .trim();
     }
 
     public boolean isOnAddEmployeePage() {
@@ -110,7 +124,8 @@ public class EmployeePage extends BasePage {
     }
 
     public boolean isPersonalDetailsDisplayedNow() {
-        return driver.getCurrentUrl().contains("/pim/viewPersonalDetails/empNumber/")
+        return driver.getCurrentUrl()
+                .contains("/pim/viewPersonalDetails/empNumber/")
                 && isDisplayedNow(EmployeeLocators.FIRST_NAME);
     }
 
@@ -126,11 +141,15 @@ public class EmployeePage extends BasePage {
         return waitUntilVisualStateIsReady();
     }
 
-    public String addEmployee(String firstName, String middleName, String lastName) {
+    public String addEmployee(
+            String firstName,
+            String middleName,
+            String lastName) {
         goToPIM();
         clickAddEmployee();
         fillEmployeeForm(firstName, middleName, lastName);
-        String generatedEmployeeId = waitUntilHasValue(EmployeeLocators.EMPLOYEE_ID);
+        String generatedEmployeeId =
+                waitUntilHasValue(EmployeeLocators.ADD_EMPLOYEE_ID);
         saveEmployee();
         return generatedEmployeeId;
     }

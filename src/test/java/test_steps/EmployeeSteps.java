@@ -71,7 +71,7 @@ public class EmployeeSteps {
     }
 
     public void validarQueElEmpleadoQuedeGuardado() {
-        String savedEmployeeId = employeePage.getEmployeeId();
+        String savedEmployeeId = employeePage.getEmployeeId(employeeId);
         String savedFirstName = employeePage.getSavedFirstName();
         String savedMiddleName = employeePage.getSavedMiddleName();
         String savedLastName = employeePage.getSavedLastName();
