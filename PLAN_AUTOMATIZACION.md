@@ -136,6 +136,22 @@ La automatización se considera lista cuando:
 
 ## 10. Estado actual
 
+### Resultado de la regresión final
+
+- 18 ejecuciones: seis casos automatizados en Chrome, Firefox y Edge.
+- 16 resultados PASS, 2 FAIL y 0 SKIP.
+- Los dos fallos corresponden a TC11 en Chrome y Edge; Firefox conservó el
+  comportamiento esperado.
+
+### Trazabilidad de defectos
+
+- **KAN-1 / TC05:** mensaje de recuperación exitoso para un username inexistente;
+  documentado y ejecutado manualmente.
+- **KAN-5 / TC11:** contenido PIM cacheado visible después del logout al usar
+  Back en Chrome y Edge. Una URL protegida continúa exigiendo autenticación, por
+  lo que no se presenta como sesión activa ni como vulnerabilidad de autorización
+  confirmada.
+
 ### Completado
 
 - Page Object Model y localizadores centralizados.

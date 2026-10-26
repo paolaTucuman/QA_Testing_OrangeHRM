@@ -1,160 +1,189 @@
-# Automatizacion web de OrangeHRM
+# OrangeHRM QA Testing & Web Automation
 
-Proyecto de QA para automatizar casos funcionales sobre la instancia publica de demostracion de OrangeHRM. Utiliza Java, Selenium WebDriver, TestNG, Maven y el patron Page Object Model.
+Proyecto de portafolio QA que combina diseño de pruebas, automatización web,
+ejecución Data-Driven, validación multibrowser, evidencia técnica y trazabilidad
+de defectos sobre la instancia pública de demostración de OrangeHRM.
 
-Los ejecutables de ChromeDriver, GeckoDriver y EdgeDriver se resuelven mediante
-Selenium Manager, incluido oficialmente en Selenium. No se requiere instalar ni
-configurar los drivers manualmente.
+## Resumen ejecutivo
 
-## Estado actual
+- **Sistema evaluado:** OrangeHRM Open Source Demo.
+- **Alcance funcional:** autenticación, recuperación de contraseña, gestión de empleados y cierre de sesión.
+- **Casos diseñados:** 11 (6 automatizados y 5 manuales).
+- **Regresión automatizada:** 18 ejecuciones, 16 PASS, 2 FAIL y 0 SKIP.
+- **Navegadores:** Chrome, Firefox y Edge.
+- **Defectos documentados:** KAN-1 (TC05) y KAN-5 (TC11).
+- **Enfoque técnico:** Java, Selenium WebDriver, TestNG, Maven, Page Object Model y datos administrados desde Excel.
 
-Actualmente el proyecto incluye:
+## Objetivo
 
-- TC01: login con credenciales validas.
-- TC02: login con password invalida.
-- TC06: registro de un empleado con datos validos.
-- TC07: busqueda por ID de un empleado creado por la propia prueba.
-- TC08: validacion de First Name obligatorio.
-- TC11: logout, exposicion visual de contenido protegido mediante Back y
-  verificacion de que una URL protegida vuelva a exigir autenticacion.
-- Datos funcionales y matriz de ejecucion dirigidos desde `TestData.xlsx`.
-- Evidencias de exito y capturas automaticas ante fallos.
-- Regresion controlada por caso, suite y navegador desde Excel.
-- Integracion opcional con Jira, desactivada por defecto.
+Validar flujos críticos de OrangeHRM con pruebas mantenibles y trazables. El framework separa los datos, los pasos funcionales, la interacción con la página, los localizadores y las aserciones. Las capturas complementan las validaciones, pero no determinan por sí solas el resultado de una prueba.
 
-El avance y las siguientes fases se encuentran en `PLAN_AUTOMATIZACION.md`.
+## Alcance y casos de prueba
+
+| Caso | Tipo | Modalidad | Escenario | Resultado final |
+|---|---|---|---|---|
+| TC01 | Positivo | Automatizado | Login con credenciales válidas | PASS |
+| TC02 | Negativo | Automatizado | Login con contraseña inválida | PASS |
+| TC03 | Negativo | Manual | Username obligatorio | PASS |
+| TC04 | Negativo | Manual | Password obligatorio | PASS |
+| TC05 | Negativo | Manual | Recuperación con usuario inexistente | Hallazgo KAN-1 |
+| TC06 | Positivo | Automatizado | Crear empleado con datos válidos | PASS |
+| TC07 | Positivo | Automatizado | Buscar empleado creado por ID | PASS |
+| TC08 | Negativo | Automatizado | First Name obligatorio | PASS |
+| TC09 | Negativo | Manual | Cancelar creación de empleado | PASS |
+| TC10 | Negativo | Manual | Buscar empleado inexistente | PASS |
+| TC11 | Seguridad | Automatizado | Logout y navegación Back | Hallazgo KAN-5 |
+
+## Resultado de la regresión
+
+La suite ejecutó los seis casos automatizados en tres navegadores:
+
+| Navegador | Ejecuciones | PASS | FAIL |
+|---|---:|---:|---:|
+| Chrome | 6 | 5 | 1 |
+| Firefox | 6 | 6 | 0 |
+| Edge | 6 | 5 | 1 |
+| **Total** | **18** | **16** | **2** |
+
+Los dos fallos corresponden a TC11 en Chrome y Edge. Firefox mantuvo el comportamiento esperado.
+
+## Hallazgos documentados
+
+### KAN-1 — TC05: recuperación para usuario inexistente
+
+OrangeHRM muestra el mensaje `Reset Password link sent successfully` después de ingresar un username inexistente. El caso fue documentado para analizar si el mensaje representa el comportamiento esperado del producto o una comunicación engañosa para el usuario.
+
+![Evidencia TC05](docs/evidence/tc05-password-recovery-bug.png)
+
+### KAN-5 — TC11: contenido PIM visible después del logout
+
+Después de cerrar sesión y usar Back, Chrome y Edge vuelven a mostrar contenido PIM almacenado en caché. La navegación directa a una URL protegida sí exige autenticación, por lo que el alcance del hallazgo es **exposición visual de contenido cacheado**; no se afirma que exista una sesión activa ni una vulnerabilidad de autorización confirmada.
+
+![Evidencia TC11](docs/evidence/tc11-session-after-logout.png)
+
+## Arquitectura
+
+```text
+TestData.xlsx
+      |
+      v
+TestNG + DataProviders --> test_steps --> page_objects --> page_locators
+          |                   |               |
+          |                   |               +--> Selenium WebDriver
+          |                   +--> aserciones y lenguaje funcional
+          +--> filtros de suite/navegador, evidencia y Jira
+```
+
+```text
+src/main/java/page_base/       Comportamiento común de los Page Objects
+src/main/java/page_locators/   Localizadores centralizados por página
+src/main/java/page_objects/    Acciones de Login, Dashboard y empleados
+src/test/java/page_base/       Ciclo de vida del WebDriver
+src/test/java/page_tests/      Orquestación mínima de los casos TestNG
+src/test/java/test_steps/      Pasos funcionales legibles y aserciones
+src/test/java/page_utils/      Excel, filtros, evidencia, capturas y Jira
+src/test/resources/            Matriz y datos de prueba
+testing.xml                    Suite de regresión multibrowser
+```
+
+La capa `test_steps` mantiene los métodos de prueba cercanos al lenguaje natural sin incorporar Cucumber ni una dependencia adicional. Los tests describen el flujo; los Page Objects controlan Selenium; y las clases de localizadores concentran los selectores usados por cada página.
+
+## Ejecución Data-Driven
+
+`src/test/resources/TestData.xlsx` contiene cinco hojas:
+
+- `settings`: selecciona `ALL`, `POSITIVE`, `NEGATIVE` o `SECURITY`.
+- `execution`: controla caso, suite, Jira y navegador.
+- `login`: entradas y resultados esperados de TC01 y TC02.
+- `employee`: datos de TC06, TC07 y TC08.
+- `session`: condiciones y resultados esperados de TC11.
+
+![Control de ejecución](docs/evidence/test-data-execution-control.png)
+
+Los datos dinámicos de empleados reciben un sufijo temporal para evitar colisiones en la demo compartida. Excel no almacena tokens ni credenciales personales.
+
+## Estrategia multibrowser
+
+`testing.xml` declara Chrome, Firefox y Edge en ejecución secuencial. Antes de crear cada WebDriver, `ExecutionFilter` consulta la suite seleccionada y las columnas `enabled`, `chrome`, `firefox` y `edge` de Excel. Esto permite controlar la regresión sin modificar el código.
+
+Las esperas se basan en estados visibles y funcionales de la aplicación. No se utilizan pausas fijas para ocultar problemas de sincronización. Selenium Manager resuelve los drivers de los navegadores.
+
+## Evidencias y trazabilidad
+
+`EvidenceReporter` registra caso, navegador, validación, esperado, actual y resultado. `ScreenshotHelper` prepara el estado visual y guarda capturas con el caso y navegador en el nombre. Las aserciones TestNG son la fuente del PASS/FAIL.
+
+![Empleado creado](docs/evidence/tc06-employee-created.png)
+
+Los casos, historias y defectos se organizaron en Jira dentro de un Epic de validación funcional y de seguridad. Los defectos se vincularon con su caso de prueba para conservar trazabilidad.
+
+![Tablero Jira](docs/evidence/jira-kanban-board.png)
+
+![Trazabilidad Jira](docs/evidence/jira-traceability.png)
+
+## Integración con Jira
+
+La creación o actualización automática requiere tres autorizaciones simultáneas:
+
+1. `jira.enabled=true` en la configuración local.
+2. `jira.auto.create=true` en la configuración local.
+3. `jiraReport=TRUE` para el caso en Excel.
+
+Antes de crear una incidencia, `JiraReporter` busca un issue abierto del mismo `caseId`. Si existe, reutiliza la incidencia y agrega solo la evidencia o el navegador faltante; si no existe, crea una nueva. Así se evita generar un ticket por cada navegador o ejecución.
 
 ## Requisitos
 
 - Java 25.
 - Maven 3.9 o posterior.
-- Google Chrome, Mozilla Firefox y Microsoft Edge.
-- Acceso a Internet para descargar dependencias y utilizar OrangeHRM Demo.
+- Chrome, Firefox y Edge.
+- Acceso a Internet para dependencias y OrangeHRM Demo.
 
-## Configuracion local
+## Configuración local
 
-1. Copiar `config.example.properties` como `src/test/resources/config.properties`.
-2. Completar las credenciales de la instancia publica de OrangeHRM.
-3. Mantener `jira.enabled=false` mientras no se quiera crear incidencias.
-4. Si se habilita Jira, completar sus valores solo en `config.properties`.
-
-En PowerShell:
+Copiar el archivo de ejemplo:
 
 ```powershell
 Copy-Item config.example.properties src/test/resources/config.properties
 ```
 
-`config.properties` esta excluido mediante `.gitignore` y no debe incorporarse al repositorio.
+Completar únicamente la copia local. `src/test/resources/config.properties` está excluido mediante `.gitignore` y nunca debe confirmarse en Git.
 
-La configuracion sigue esta prioridad: propiedad Java (`-Dclave=valor`), variable
-de entorno, archivo local y valor por defecto. Los nombres de entorno se obtienen
-reemplazando puntos por guiones bajos y usando mayusculas. Por ejemplo:
+La prioridad de configuración es: propiedad Java (`-Dclave=valor`), variable de entorno, archivo local y valor por defecto. Jira permanece desactivado por defecto.
 
-```text
-ADMIN_USERNAME
-ADMIN_PASSWORD
-JIRA_URL
-JIRA_EMAIL
-JIRA_API_TOKEN
-JIRA_PROJECT_KEY
-```
+## Ejecución
 
-`jira.enabled` permite usar la integracion y `jira.auto.create` es el interruptor
-global para crear o actualizar incidencias. Ademas, cada caso debe tener
-`jiraReport=TRUE` en Excel. Las tres condiciones evitan reportes accidentales.
-Ambas propiedades locales permanecen en `false` por defecto.
-
-Antes de crear una incidencia, la integracion busca un ticket abierto del mismo
-`caseId`. Si existe, reutiliza el ticket y agrega la evidencia del navegador como
-adjunto y comentario. Esto evita crear un bug nuevo por cada navegador o corrida.
-
-## Ejecucion
-
-Desde la raiz del proyecto:
+Desde la raíz del proyecto:
 
 ```powershell
 mvn clean test
 ```
 
-Maven ejecuta la suite definida en `testing.xml`. Los reportes, capturas y archivos generados se guardan en directorios ignorados por Git, como `target/` y `test-output/`.
+En Eclipse: clic derecho en `testing.xml` y `Run As > TestNG Suite`. Para obtener la regresión completa no se debe ejecutar una clase individual.
 
-La suite contempla Chrome, Firefox y Edge, en ese orden y sin paralelismo. Antes de
-abrir un navegador, `ExecutionFilter` consulta las hojas `settings` y `execution`.
-Solo conserva los casos habilitados que pertenecen a la suite seleccionada y cuyo
-navegador esta marcado con `TRUE`.
-
-`settings.runSuite` acepta `ALL`, `POSITIVE`, `NEGATIVE` o `SECURITY`. Con `ALL`
-se ejecutan todos los casos habilitados. El control por navegador permanece en la
-hoja `execution`, por lo que no es necesario modificar codigo ni `testing.xml`.
-
-Desde Eclipse tambien se puede ejecutar haciendo clic derecho en `testing.xml` y
-seleccionando `Run As > TestNG Suite`. Para validar la regresion completa no se
-debe ejecutar una clase individual.
-
-Durante la ejecucion no se debe interactuar con las ventanas de los navegadores.
-Las capturas identifican el caso y el navegador para conservar la trazabilidad de
-la evidencia. El resumen final se consulta en la consola y en el reporte TestNG.
-
-Antes de cada captura de exito, los Page Objects esperan que el documento, las
-fuentes, los indicadores de carga y los ciclos de renderizado esten listos. Las
-imagenes se conservan sin modificaciones. El reporte TestNG registra por cada
-validacion el caso, navegador, valor esperado, valor actual y resultado, sin
-incluir passwords.
-
-`EvidenceReporter` no decide si una prueba aprueba o falla: esa responsabilidad
-permanece en las aserciones TestNG. El componente agrega trazabilidad a la consola
-y al Reporter Output. Si vence solamente la preparacion visual, la prueba conserva
-su resultado funcional y la captura queda identificada como `INCOMPLETA`; cuando
-la interfaz queda estable se registra como `LISTA`.
-
-## Datos de prueba
-
-`src/test/resources/TestData.xlsx` contiene cinco hojas:
-
-- `settings`: selecciona con `runSuite` si se ejecutan todos los casos o solamente
-  las suites positiva, negativa o de seguridad.
-- `execution`: una fila por caso. `enabled=FALSE` excluye el caso completo;
-  `suite` clasifica el escenario; `jiraReport` autoriza o bloquea el reporte
-  automatico de ese caso; `chrome`, `firefox` y `edge` seleccionan navegadores;
-  `dataSheet` indica de que hoja se obtienen los inputs.
-- `login`: credenciales de demostracion y resultados esperados de TC01 y TC02.
-- `employee`: datos no sensibles, modos de generacion y resultados esperados de
-  TC06, TC07 y TC08.
-- `session`: seccion protegida y resultados esperados de TC11.
-
-Solo deben utilizarse `TRUE` o `FALSE` en las columnas de control. Los IDs de
-caso y los encabezados no deben renombrarse, porque se validan antes de ejecutar.
-Los nombres `AUTO` reciben un sufijo de fecha/hora para evitar registros
-duplicados; `BLANK` representa un valor intencionalmente vacio.
-
-El libro contiene datos destinados exclusivamente a la instancia publica de
-demostracion. No se deben agregar credenciales personales, corporativas, tokens
-de Jira ni otros secretos. Las credenciales administrativas y de Jira pertenecen
-a la configuracion local ignorada por Git o, en CI, a variables/secretos del
-entorno.
+Los reportes y capturas se generan en `target/` y `test-output/`, ambos ignorados por Git.
 
 ## Seguridad
 
-- No confirmar `src/test/resources/config.properties`.
-- No imprimir contraseñas ni tokens en la consola.
-- No habilitar Jira durante pruebas locales salvo que se quiera crear una incidencia real.
-- No activar `jira.auto.create` durante la regresion general.
-- Mantener `jiraReport=FALSE` salvo para casos que deban reportarse automaticamente.
-- Revisar `git status` y el contenido preparado antes de cada commit.
+- No versionar `config.properties`, tokens de Jira ni credenciales personales.
+- No imprimir passwords o tokens en consola.
+- Mantener Jira desactivado salvo cuando se quiera reportar una incidencia real.
+- Revisar `git status` y el diff preparado antes de cada commit.
+- Usar secretos del entorno cuando el proyecto se ejecute en CI.
 
-## Estructura principal
+## Limitaciones
 
-```text
-src/main/java/page_base/       Base reutilizable para Page Objects
-src/main/java/page_locators/   Localizadores organizados por pagina
-src/main/java/page_objects/    Page Objects de Login y empleados
-src/test/java/page_base/       Preparacion y cierre del navegador
-src/test/java/page_tests/      Casos automatizados
-src/test/java/page_utils/      Configuracion, Excel, Jira y capturas
-src/test/resources/            Datos y configuracion local
-testing.xml                    Suite de regresion TestNG
-```
+- OrangeHRM es una demo pública: puede cambiar, responder lentamente o contener datos creados por otros usuarios.
+- TC11 depende del comportamiento de caché de cada navegador.
+- La evidencia visual no reemplaza una validación funcional.
+- Los textos visibles solo se validan literalmente cuando forman parte del requisito, para reducir fallos por idioma.
 
-Los localizadores se almacenan como constantes `By` en `page_locators`. Los Page
-Objects consumen esos selectores y conservan las acciones y validaciones; los
-tests no acceden directamente a los localizadores.
+## Aprendizajes y aporte
+
+El proyecto demuestra diseño de casos, automatización mantenible, depuración de pruebas inestables, manejo de datos, validación cross-browser, análisis cuidadoso de defectos y trazabilidad con Jira. La solución evolucionó desde tests con mucha lógica técnica hasta escenarios breves que delegan en pasos funcionales y Page Objects reutilizables.
+
+## Tecnologías
+
+Java 25 · Selenium WebDriver 4.49 · TestNG 7.10 · Maven · Apache POI · Jira Cloud · Git · GitHub
+
+## Estado del proyecto
+
+La automatización y la documentación académica están finalizadas. El repositorio queda preparado como caso de portafolio y como base para incorporar CI/CD, reportes publicables y nuevos escenarios relevantes.
