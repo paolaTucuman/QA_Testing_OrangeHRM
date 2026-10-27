@@ -2,7 +2,9 @@
 
 ## 1. Propósito
 
-Este documento resume el alcance, la arquitectura, los criterios de calidad y el estado del framework de automatización. Complementa al README: el README explica cómo instalar y ejecutar el proyecto, mientras este plan explica qué se automatizó, por qué se tomaron estas decisiones y cómo debe evolucionar el repositorio.
+Definir el alcance, la arquitectura, los criterios de calidad y el estado del
+framework de automatización utilizado para validar los flujos seleccionados de
+OrangeHRM.
 
 ## 2. Objetivos
 
@@ -25,7 +27,8 @@ Este documento resume el alcance, la arquitectura, los criterios de calidad y el
 | TC08 | NEGATIVE | Validación de First Name obligatorio |
 | TC11 | SECURITY | Logout y revisión del contenido protegido al usar Back |
 
-Quedan fuera del alcance de este repositorio los casos exclusivamente manuales, las pruebas de API/Postman y el registro manual de defectos que no provengan de un caso automatizado.
+Los casos exclusivamente manuales no se ejecutan desde esta suite. Los defectos
+manuales se registran directamente en Jira.
 
 ## 4. Arquitectura
 
@@ -163,7 +166,7 @@ La automatización se considera lista cuando:
 - Integración con Jira con búsqueda y reutilización de issues.
 - Exclusión de secretos y artefactos mediante .gitignore.
 
-### Mejoras futuras opcionales
+### Próximas mejoras
 
 - Integrar GitHub Actions para ejecutar una regresión controlada.
 - Publicar el reporte de TestNG como artefacto del pipeline.
@@ -180,6 +183,8 @@ La automatización se considera lista cuando:
 - El texto visible puede variar por idioma; solo debe validarse literalmente cuando el texto sea el requisito.
 - Antes de cada commit debe revisarse git status para impedir la inclusión de secretos o evidencias temporales.
 
-## 12. Resultado esperado del proyecto
+## 12. Características de la solución
 
-El repositorio presenta una solución de automatización mantenible, Data-Driven y multibrowser. La separación entre pruebas, pasos funcionales, páginas y localizadores permite explicar el flujo con claridad, modificar componentes sin duplicación y conservar trazabilidad mediante Excel, evidencia técnica y Jira.
+La solución es Data-Driven, multibrowser y mantenible. La separación entre
+pruebas, pasos funcionales, páginas y localizadores reduce la duplicación y
+mantiene la trazabilidad mediante Excel, evidencia técnica y Jira.

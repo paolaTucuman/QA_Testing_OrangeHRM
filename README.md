@@ -1,8 +1,8 @@
 # OrangeHRM QA Testing & Web Automation
 
-Proyecto de portafolio QA que combina diseño de pruebas, automatización web,
-ejecución Data-Driven, validación multibrowser, evidencia técnica y trazabilidad
-de defectos sobre la instancia pública de demostración de OrangeHRM.
+Proyecto de aseguramiento de calidad para validar la instancia pública de
+OrangeHRM mediante pruebas manuales y automatizadas, ejecución Data-Driven,
+validación multibrowser, evidencia técnica y trazabilidad de defectos.
 
 ## Resumen ejecutivo
 
@@ -176,9 +176,11 @@ Los reportes y capturas se generan en `target/` y `test-output/`, ambos ignorado
 - La evidencia visual no reemplaza una validación funcional.
 - Los textos visibles solo se validan literalmente cuando forman parte del requisito, para reducir fallos por idioma.
 
-## Aprendizajes y aporte
+## Capacidades cubiertas
 
-El proyecto demuestra diseño de casos, automatización mantenible, depuración de pruebas inestables, manejo de datos, validación cross-browser, análisis cuidadoso de defectos y trazabilidad con Jira. La solución evolucionó desde tests con mucha lógica técnica hasta escenarios breves que delegan en pasos funcionales y Page Objects reutilizables.
+El alcance técnico incluye diseño de casos, automatización web, manejo de datos,
+validación cross-browser, análisis de defectos y trazabilidad con Jira. Los casos
+delegan sus acciones en pasos funcionales y Page Objects reutilizables.
 
 ## Tecnologías
 
@@ -186,4 +188,6 @@ Java 25 · Selenium WebDriver 4.49 · TestNG 7.10 · Maven · Apache POI · Jira
 
 ## Estado del proyecto
 
-La automatización y la documentación académica están finalizadas. El repositorio queda preparado como caso de portafolio y como base para incorporar CI/CD, reportes publicables y nuevos escenarios relevantes.
+La suite automatizada cubre seis casos en Chrome, Firefox y Edge. Los resultados,
+hallazgos, evidencias y limitaciones de la ejecución se encuentran documentados
+en este repositorio.
